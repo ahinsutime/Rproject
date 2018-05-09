@@ -1,6 +1,9 @@
 Useful guide
 https://backlog.com/git-tutorial/kr/reference/remote.html
 
+git installer for mac
+http://sourceforge.net/projects/git-osx-installer/
+
 
 Setup
 1. Go to c:/
