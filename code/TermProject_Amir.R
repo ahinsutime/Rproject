@@ -1,8 +1,8 @@
 rm(list=ls())
 dev.off()
 
-setwd("C:/Rdata")
-
+setwd("/Users/Amirsam/Desktop/Rdata-Project")
+getwd()
 #install.packages("githubinstall")
 #library(githubinstall)
 #githubinstall("https://github.com/awesomedata/awesome-public-datasets")
@@ -15,8 +15,9 @@ library(data.table)
 
 #Datasets of crime
 
-globalTerrorism <- fread.csv('globalterrorismdb_0617dist.csv', stringsAsFactors=TRUE)
-gunViolence <- fread.csv('gun-violence-data_01-2013_03-2018.csv', stringsAsFactors=TRUE)
+globalTerrorism <- fread('globalterrorismdb_0617dist.csv', stringsAsFactors=TRUE)
+gunViolence <- fread('gun-violence-data_01-2013_03-2018.csv', stringsAsFactors=TRUE)
+head(gunViolence)
 #globalTerrorism <- read.csv('globalterrorismdb_0617dist.csv', header=TRUE)
 #gunViolence <- read.csv('gun-violence-data_01-2013_03-2018.csv', header=TRUE)
 
