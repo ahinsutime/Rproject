@@ -28,12 +28,6 @@ GlobalLandTemp_State <- fread.csv('GlobalLandTemperaturesByState.csv', stringsAs
 GlobalLandTemp_MajorCity <- fread.csv('GlobalLandTemperaturesByMajorCity.csv', stringsAsFactors=TRUE)
 GlobalLandTemp_Country <- fread.csv('GlobalLandTemperaturesByCountry.csv', stringsAsFactors=TRUE)
 GlobalLandTemp_City <- fread("GlobalLandTemperaturesByCity.csv", stringsAsFactors=TRUE)
-#AirPollution <- read.csv('Facility Air Pollution Dataset - All Facilities.csv', header=TRUE)
-#GlobalTemperature <- read.csv('GlobalTemperatures.csv', header=TRUE)
-#GlobalLandTemp_State <- read.csv('GlobalLandTemperaturesByState.csv', header=TRUE)
-#GlobalLandTemp_MajorCity <- read.csv('GlobalLandTemperaturesByMajorCity.csv', header=TRUE)
-#GlobalLandTemp_Country <- read.csv('GlobalLandTemperaturesByCountry.csv', header=TRUE)
-#GlobalLandTemp_City <- read.csv('GlobalLandTemperaturesByCity.csv', header=TRUE)
 
 ###############################################################################################
 
