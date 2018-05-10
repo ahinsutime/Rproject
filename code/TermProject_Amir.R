@@ -21,6 +21,8 @@ head(gunViolence)
 #globalTerrorism <- read.csv('globalterrorismdb_0617dist.csv', header=TRUE)
 #gunViolence <- read.csv('gun-violence-data_01-2013_03-2018.csv', header=TRUE)
 
+# test my name
+
 #Datasets of climate
 
 AirPollution <- fread.csv('Facility Air Pollution Dataset - All Facilities.csv', stringsAsFactors=TRUE)
