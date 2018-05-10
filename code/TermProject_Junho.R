@@ -1,7 +1,6 @@
 rm(list=ls())
 dev.off()
 
-setwd("HOme")
 
 #install.packages("githubinstall")
 #library(githubinstall)
