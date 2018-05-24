@@ -1,8 +1,8 @@
 rm(list=ls())
 dev.off()
 
-setwd("C:/Rdata")
-
+setwd("/Users/Amirsam/Desktop/Rdata-Project")
+getwd()
 #install.packages("githubinstall")
 #library(githubinstall)
 #githubinstall("https://github.com/awesomedata/awesome-public-datasets")
@@ -15,10 +15,13 @@ library(data.table)
 
 #Datasets of crime
 
-globalTerrorism <- fread.csv('globalterrorismdb_0617dist.csv', stringsAsFactors=TRUE)
-gunViolence <- fread.csv('gun-violence-data_01-2013_03-2018.csv', stringsAsFactors=TRUE)
+globalTerrorism <- fread('globalterrorismdb_0617dist.csv', stringsAsFactors=TRUE)
+gunViolence <- fread('gun-violence-data_01-2013_03-2018.csv', stringsAsFactors=TRUE)
+head(gunViolence)
 #globalTerrorism <- read.csv('globalterrorismdb_0617dist.csv', header=TRUE)
 #gunViolence <- read.csv('gun-violence-data_01-2013_03-2018.csv', header=TRUE)
+
+# test my name
 
 #Datasets of climate
 
@@ -28,12 +31,6 @@ GlobalLandTemp_State <- fread.csv('GlobalLandTemperaturesByState.csv', stringsAs
 GlobalLandTemp_MajorCity <- fread.csv('GlobalLandTemperaturesByMajorCity.csv', stringsAsFactors=TRUE)
 GlobalLandTemp_Country <- fread.csv('GlobalLandTemperaturesByCountry.csv', stringsAsFactors=TRUE)
 GlobalLandTemp_City <- fread("GlobalLandTemperaturesByCity.csv", stringsAsFactors=TRUE)
-#AirPollution <- read.csv('Facility Air Pollution Dataset - All Facilities.csv', header=TRUE)
-#GlobalTemperature <- read.csv('GlobalTemperatures.csv', header=TRUE)
-#GlobalLandTemp_State <- read.csv('GlobalLandTemperaturesByState.csv', header=TRUE)
-#GlobalLandTemp_MajorCity <- read.csv('GlobalLandTemperaturesByMajorCity.csv', header=TRUE)
-#GlobalLandTemp_Country <- read.csv('GlobalLandTemperaturesByCountry.csv', header=TRUE)
-#GlobalLandTemp_City <- read.csv('GlobalLandTemperaturesByCity.csv', header=TRUE)
 
 ###############################################################################################
 
