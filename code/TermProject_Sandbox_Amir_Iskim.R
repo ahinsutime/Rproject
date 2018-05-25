@@ -55,6 +55,8 @@ library(ggplot2)
 
 storm <- read.table("repdata-data-StormData.csv", sep = ",", header = TRUE)
 
+str(storm)
+
 storm1 = storm
 
 str(storm1)
@@ -65,7 +67,9 @@ storm1$Begin.Time <- as.POSIXct(strptime(storm1$BGN_DATE, format ="%m/%d/%Y %H:%
 
 storm1$Year.Begin <- year(as.Date(storm1$Begin.Time))
 
-
+(storm$LATITUDE)
+(storm$LONGITUDE)
+storm$REMARKS
 
 ## Changing to AVALANCHE
 storm1 <- transform(storm1,
@@ -452,8 +456,43 @@ plot(getnetwork(result))
 # plot(knet,edge.arrow.size=0.4,edge.color="gray47",vertex.label.color="black",
 #      vertex.label.cex=1.2,vertex.size=30,layout=layout.circle)
 
+str(storm2)
+head(storm2$REMARKS, 6)
+test <- as.character(storm2$REMARKS)
+test[1]
 
+#install.packages("NLP")
+#install.packages("tm")
+library(NLP); library(tm)
 
+star <- test[1]
 
+corp <- Corpus(VectorSource(star))
+#inspect(corp)
+corp = tm_map(corp,removePunctuation)
+corp = tm_map(corp,tolower)
+corp = tm_map(corp,removeNumbers)
+corp = tm_map(corp,removeWords, stopwords("english"))
+corp <- tm_map(corp, removeWords,c("can","far","live",
+                                   "now","one","say","will"))
+#inspect(corp)
+corp = tm_map(corp,PlainTextDocument)
+corp
+#inspect(corp) #Not displaying the text
+
+#page 5
+dtm <- DocumentTermMatrix(corp)  
+Freq <- sort(colSums(as.matrix(dtm)), decreasing=TRUE)  
+head(Freq,20)
+
+#page 6
+#install.packages("wordcloud")
+library(RColorBrewer); library(wordcloud)
+#install.packages("RColorBrewer")
+#install.packages("wordcloud")
+wf <- data.frame(Word=names(Freq), Freq=Freq)
+wordcloud(words=wf$Word, freq=wf$Freq, min.freq=3,
+          random.order=FALSE, rot.per=0.35,
+          colors=brewer.pal(8,"Dark2"))
 
 
