@@ -27,11 +27,11 @@ library(pROC)
 
 
 library(data.table)
-install.packages("R.utils")
+#install.packages("R.utils")
 library(R.oo)
 library(R.methodsS3)
 library(R.utils) 
-install.packages("downloader")
+#install.packages("downloader")
 library(downloader)
 library(lubridate)
 library(plyr)
@@ -130,232 +130,260 @@ storm1 <- transform(storm1,
 storm1 <- transform(storm1,
                     EVTYPE = revalue(storm1$EVTYPE, c("WINTER WEATHER/MIX" = "WINTER WEATHER")))
 
-
-
-## storm2 <- data.frame(storm1$EVTYPE, storm1$FATALITIES, storm1$INJURIES, storm1$PROPDMG, storm1$PROPDMGEXP, storm1$CROPDMG, storm1$CROPDMGEXP, storm1$Year.Begin)
-## colnames(storm2) <- c("Event", "Fatalities", "Injuries", "PROPDMG", "PROPDMGEXP", "CROPDMG", "CROPDMGEXP", "Year" )
-
+str(storm1)
 storm2 <- storm1
 
+
+#storm2 <- data.frame(storm1$EVTYPE, storm1$FATALITIES, storm1$INJURIES, storm1$PROPDMG, storm1$PROPDMGEXP, storm1$CROPDMG, storm1$CROPDMGEXP, storm1$Year.Begin)
+#colnames(storm2) <- c("Event", "Fatalities", "Injuries", "PROPDMG", "PROPDMGEXP", "CROPDMG", "CROPDMGEXP", "Year" )
+
+
+
+head(storm2)
+str(storm2)
+
+
+## PROPDMG is:  "Property damage in whole numbers and hundredths"
+
+## PROPDMGEXP is:  "A multiplier where Hundred (H), Thousand (K), Million (M), Billion (B)
+
+## CROPDMG is: "Crop damage in whole numbers and hundredths"
+
+## CROPDMGEXP is : "A multiplier where Hundred (H), Thousand (K), Million (M), Billion (B)"
+
+## Exploring the variables levels, it is found: 
+
+levels(storm2$PROPDMGEXP)
+
+## According to the Code Book, this variable is an exponential, and K, M, and B are recognized. "" "-" "? "+" are not recognized and will be deleted.
+
+## I will do this transformations on a new variable
+
+missings <- c("-", "?", "+", "")
+
+storm2$exp.property <- storm2$PROPDMGEXP
+
+storm2 <- storm2[!storm2$exp.property %in% missings,]
+storm2$exp.property <- droplevels(storm2$exp.property)
+
+
+levels(storm2$CROPDMGEXP)
+
+## According to the Code Book, "" "?" are not recognized and will be deleted. I will do this on a new variable for Crop
+
+storm2$exp.crop <- storm2$CROPDMGEXP
+
+
+storm2 <- storm2[!storm2$exp.crop %in% missings,]
+storm2$exp.crop <- droplevels(storm2$exp.crop)
+
+
+## to confirm the procedure, I explore again levels
+
+levels(storm2$exp.property)
+
+levels(storm2$exp.crop)
+
+## Now, I will proceed to transform the exponentials, to numbers
+
+
+storm2 <- transform(storm2,
+                    exp.property = revalue(storm2$exp.property, c("K" = 3, "m" = 6, "M" = 6, "B" = 9, "h" = 2, "H" = 2)))
+
+
+
+storm2 <- transform(storm2,
+                    exp.crop = revalue(storm2$exp.crop, c("K" = 3, "k" = 3, "m" = 6, "M" = 6, "B" = 9)))
+
+
+## Now, I will check if the process was finally done
+
+levels(storm2$exp.property)
+
+levels(storm2$exp.crop)
+
+# In the process of cleaning economic consequences variables, I proceed to build a new variable, combinig variables with their exponentials.
+storm2$exp.property <- as.numeric(storm2$exp.property)
+
+storm2$exp.crop <- as.numeric(storm2$exp.crop)
+
+storm2$property.costs <- storm2$PROPDMG^storm2$exp.property
+
+storm2$crop.costs <- storm2$CROPDMG^storm2$exp.crop
+
+storm2$total.costs <- storm2$property.costs + storm2$crop.costs
+
+#Note: Checking if variables were well created
+summary(storm2$property.costs)
+summary(storm2$crop.costs)
+summary(storm2$total.costs)
+
+#First Question: Across the United States, which types of events (as indicated in the EVTYPE variable) are most harmful with respect to population health?
+  
+#For resolving this question, I show first, how Fatalities and Injuries happened per year, during the period, and after, I show how Fatalities and Injuries happened across United States, per Event.
+#1. Estimating total fatalities and injuries during the period, per year
+library(data.table)
+fatalities.year <- aggregate(storm1$FATALITIES, by = list(storm1$Year.Begin), FUN = sum)
+colnames(fatalities.year) <- c("Year", "Fatalities")
+head(fatalities.year)
+
+injuries.year <- aggregate(storm1$INJURIES, by = list(storm1$Year.Begin), FUN = sum)
+colnames(injuries.year) <- c("Year", "Injuries")
+head(injuries.year)
+
+morbimortality.year <- data.frame(cbind(fatalities.year, injuries.year))
+
+
+
+
+## total cases of mortality and morbidity per year
+
+morbimortality.year$Total <- as.data.table(morbimortality.year$Fatalities + morbimortality.year$Injuries)
+head(morbimortality.year)
+
+# 2. Estimating total fatalities and injuries, per event type
+
+fatalities.event <- aggregate(storm1$FATALITIES, by = list(storm1$EVTYPE), FUN = sum)
+colnames(fatalities.event) <- c("Event", "Fatalities")
+fatalities.event.sorted <- fatalities.event[order(-fatalities.event$Fatalities, na.last=TRUE), ][1:30, ]
+head(fatalities.event.sorted)
+
+injuries.event <- aggregate(storm1$INJURIES, by = list(storm1$EVTYPE), FUN = sum)
+colnames(injuries.event) <- c("Event", "Injuries")
+injuries.event.ordered <- injuries.event[order(-injuries.event$Injuries, na.last=TRUE), ][1:30, ]
+injuries.event.ordered
+
+
+# Now the plot with fatalities and injuries per year
+
+# Figure 1. “Weather events most harmful and Fatalities/Injuries Trend, per year, USA, 1950 -2011”
+
+##par = c(mfrow = c(1,1), margin = c(50,2,2,1))
+par(mfrow = c(2, 2), mar = c(11.5, 5, 4, 2), las = 3, cex = 0.5, cex.main = 1.4, cex.lab = 1.2)
+
+with(fatalities.event.sorted, barplot(Fatalities, names.arg = fatalities.event.sorted$Event, col = "red", ylab = "Fatalities", main = "Total Fatalities"))
+
+with(injuries.event.ordered, barplot(Injuries, names.arg = injuries.event.ordered$Event, col = "green", ylab = "Injuries", main = "Total Injuries"))
+
+## Fatalities related with Weather events, USA, 1950-2011
+reg <- lm(Fatalities ~ Year, data = morbimortality.year)
+with(morbimortality.year, plot(Year, Fatalities, ylab = "Fatalities", xlim = c(1945, 2015), ylim = c(0,1200), pch = 19, col ="red", main = "Total Fatalities per year"))
+par(xpd = FALSE)
+abline(reg, col="black")
+
+## Injuries related with Weather events, USA, 1950-2011
+reg1 <- lm(Injuries ~ Year, data = morbimortality.year)
+with(morbimortality.year, plot(Year, Injuries, ylab = "Injuries", xlim = c(1945, 2015), ylim = c(0,9000),  pch = 19, col = "green", main = "Total Injuries per year"))
+par(xpd = FALSE)
+abline(reg1, col="black")
+
+# Estimation of total amount of fatalities and injuries during the whole period
+
+totalfatalities <- sum(morbimortality.year$Fatalities)
+totalinjuries <- sum(morbimortality.year$Injuries)
+ratioif <-  totalinjuries/totalfatalities
+
+
+# Second Question: Across the United States, which types of events have the greatest economic consequences?
+
+# 1. Related total costs of weather events per year
+costs.year <- aggregate(storm2$total.costs, by = list(storm2$Year.Begin), FUN = sum)
+colnames(costs.year) <- c("Year", "Costs")
+head(costs.year)
+
+# 2. Related total costs per event
+total.costs.event <- aggregate(storm2$total.costs, by = list(storm2$EVTYPE), FUN = sum)
+colnames(total.costs.event) <- c("Event", "Costs")
+head(total.costs.event) 
+
+costs.event.ordered <- total.costs.event[order(-total.costs.event$Costs, na.last=TRUE), ][1:30, ]
+head(costs.event.ordered)
+
+#Finally, plot of the relationship between total costs with total morbimortality
+morbimortality.year$Total <- morbimortality.year$Fatalities + morbimortality.year$Injuries
+
+total.sum <- sum(morbimortality.year$Total)
+
+head(morbimortality.year[,-3])
+
+
+costs.sum <- sum(total.costs.event$Costs)
+
+sum.costs <- sum(costs.event.ordered$Costs[1:5])
+
+cost5ratio <- (sum.costs/costs.sum)*100 
+
+# Now, I merge both files (morbimortality and costs per year) in a data.frame, to facilitate plotting them together in the next figure
+morbimortality.year <-  as.data.table(morbimortality.year)
+
+total.costs.year <- as.data.table(costs.year)
+
+df <- merge(morbimortality.year, costs.year, by = "Year")
+
+head(df[,-3])
+
+# Figure 2. Economic consequences of weather events, per year and per event, USA, 1950-2011
+
+par(mfrow = c(2, 2), mar = c(11.5, 5, 4, 2), las = 3, cex = 0.5, cex.main = 1.4, cex.lab = 1.2)
+
+reg2 <- lm(log10(Costs) ~ Year, data = df)
+with(df, plot(log10(Costs) ~ Year, pch = 19, col = "red", ylab = "Total Log(Costs)", main = "Log10(Costs) per Year"))
+abline(reg2, col = "black")
+
+## log10(Total costs) per event 
+
+with(costs.event.ordered, barplot(log10(Costs), names.arg = costs.event.ordered$Event, col = "red", ylab = "log10(Costs)", main = "Total Costs per event type"))
+
+## Log(Costs) of Fatalities
+
+with(df, scatter.smooth(Fatalities, log10(Costs), pch = 20, col = "red", main = "Log10(Costs) of Fatalities"))
+?scatter.smooth
+## Log(Costs) of Injuries
+
+with(df, scatter.smooth(Injuries, log10(Costs), pch = 20, col = "green", main = "Log10(Costs) of Injuries"))
+
+head(df)
 head(storm2)
 
+df2 = df[,-3]
+head(df2)
 
+rf = randomForest(Costs~., data=df2, importance =T)
 
+print(rf)  # it is normal to have a different value because each computer has diferent random value 
+plot(rf, main="Random Forest Regression for Boston")
 
+length(rf$mse)
+min(rf$mse)
+mean(rf$mse)
+head(rf$mse)
+tail(rf$mse) 
 
+n <- which.min(rf$mse)  # give me the index which mse error is minimum
+n
+rf2 <- randomForest(Costs~., data=df2, 
+                    ntree=n, importance=TRUE, na.action=na.omit)  # now you can say the number of trees is the optimal one we found
+?randomForest
+print(rf2)
+# Importance of variables: higher value mean more important
+#  this importance will give you which feature is important in deciding this tree, the features at the top are important because bigger dimension/ which features come to the top ? (important) /   IncMSE: if you don't use this feature how much error will increase in your dataset / rm has the highest values, number of rooms is so important (most people use the once) / IncNodePurity (how much subtree really about that tree for example rm has the most sub trees and so important)
+importance(rf2)    
+varImpPlot(rf2, scale=T, main = "Variable Importance Plot")
 
-pima = read_csv("WeatherEvents.csv",)
-str(pima)
-summary(pima)
-head(pima,2)
-
-colnames(pima) = c("Pregnant","Plasma_Glucose","Dias_BP","Triceps_Skin","Serum_Insulin","BMI","DPF","Age","Diabetes")
-
-#Lets count the no. of NA values
-sapply(pima, function(x) sum(is.na(x)))
-
-#Lets look at a basic summary for the variables
-summary(pima)
-
-
-#Convert the Diabetes variable into a factor
-pima$Diabetes <- as.factor(pima$Diabetes)
-
-#Remove entry if Glucose,BP or BMI == 0
-pima <- pima[apply(pima[,c(2,3,6)],1,function(x) !any(x==0)),]
-
-
-
-
-#####################################################
-#Data Visualization
-
-gluc_mean <- pima %>% group_by(Diabetes) %>% summarise(Plas = round(mean(Plasma_Glucose),2))
-
-#Relationship between Plasma Glucose & Diabetes
-ggplot(data=pima,aes(Diabetes,Plasma_Glucose)) + 
-  geom_boxplot(aes(fill=Diabetes)) + stat_boxplot(geom = "errorbar") + 
-  ggtitle("Diabetes rates against Plasma Glucose Levels") + 
-  xlab("Diabetes") + ylab("Plasma Glucose") + guides(fill=F) + 
-  geom_text(data = gluc_mean, aes(x=Diabetes,y=Plas,label=Plas),
-            hjust = -1.5,vjust=-0.5)
-
-ins_mean <- pima %>% group_by(Diabetes) %>% summarise(Plas = round(mean(Serum_Insulin),2))
-
-#Relationship between Diabetes & Serum Insulin levels
-ggplot(data=pima,aes(Diabetes,Serum_Insulin)) + 
-  geom_boxplot(aes(fill=Diabetes)) + stat_boxplot(geom = "errorbar") + 
-  ggtitle("Diabetes rates against Serum Insulin Levels") + 
-  xlab("Diabetes") + ylab("Serum Insulin") + guides(fill=F) + 
-  geom_text(data = ins_mean, aes(x=Diabetes,y=Plas,label=Plas),
-            hjust = -1.5,vjust=-0.5)
-
-
-#Difference in Blood Pressure & BMI for Diabetics
-ggplot(data = pima,aes(Dias_BP,BMI)) + geom_point(aes(colour=Diabetes),alpha=0.6) +
-  xlab("Diastolic Blood Pressure") + ylab("Body Mass Index") + 
-  ggtitle("Interaction between Blood Pressure & BMI for Diabetics") + 
-  labs(colour="Diabetes Status") + 
-  scale_colour_manual(values = c("#D55E00", "#009E73"))
-
-#Relationship between pregnancy and diabetes
-ggplot(pima, aes(Pregnant, fill = Diabetes)) +
-  geom_density() + ylab("Distribution of Pregnancy") + 
-  ggtitle("Pregnant Women vs. the threat of Diabetes")
-
-#Correlelogram to help remove variables which may be correlated to one another
-corrplot(cor(pima[,-9]),type = "lower", method = "number")
-
-
-######################################################
-#Logistic Regression
-
-set.seed(15689)
-index <- createDataPartition(pima$Diabetes,p = 0.7,list = F)
-train <- pima[index,]
-test  <- pima[-index,]
-
-#Logistic Regression
-
-m1 <- glm(Diabetes ~ ., data = train, family = binomial(link = "logit"))
-summary(m1)
-
-anova(m1,test = "Chisq")
-
-
-#Remodel using only the significant variables
-mod_fin <- glm(Diabetes ~ Pregnant + Plasma_Glucose + Triceps_Skin + BMI + DPF,
-               data = train, family = binomial(link = "logit"))
-summary(mod_fin)
-
-
-#Residuals 
-summary(residuals(mod_fin))
-
-
-par(mfrow=c(2,2))
-plot(mod_fin)
-
-
-#Apply the model to the testing sample
-test_pred <- predict(mod_fin,test, type = "response")
-pred_test <- as.data.frame(cbind(test$Diabetes,test_pred))
-colnames(pred_test) <- c("Original","Test_pred")
-pred_test$outcome <- ifelse(pred_test$Test_pred > 0.5, 1, 0)
-error <- mean(pred_test$outcome != test$Diabetes)
-print(paste('Test Data Accuracy', round(1-error,2)*100,'%'))
-
-confusionMatrix(test$Diabetes,pred_test$outcome)
-
-
-
-acc_lg <- confusionMatrix(test$Diabetes,pred_test$outcome)$overall['Accuracy']
-
-# Get the ROC curve and the AUC
+head(df2)
 par(mfrow=c(1,1))
-plot.roc(test$Diabetes,test_pred,percent=TRUE,col="#1c61b6",print.auc=TRUE,
-         main = "Area under the curve for Logistic Regression")
-
-
-
-#####################################################
-#Bayesian Logistic Regression
-
-#Bayesian Logistic Regression
-prior_dist <- student_t(df = 7, location = 0, scale = 2.5)
-bayes_mod  <- stan_glm(Diabetes ~ ., data = train,
-                       family = binomial(link = "logit"), 
-                       prior = prior_dist, prior_intercept = prior_dist,
-                       seed = 15689)
-
-
-#Confidence Intervals for the predictors
-posterior_interval(bayes_mod, prob = 0.95)
-
-#Residuals for the Bayesian Model
-summary(residuals(bayes_mod))
-
-
-bayes_res <- data.frame(residuals(bayes_mod))
-bayes_res$index <- seq.int(nrow(bayes_res)) 
-colnames(bayes_res) <- "Residuals"
-
-#Plotting the residuals
-ggplot(data = bayes_res,aes(index,Residuals)) + geom_point() + ggtitle("Representation of randomness amongst Residuals")
-
-
-ggplot(data = bayes_res,aes(Residuals)) + geom_density(aes(fill=Residuals)) + 
-  ylab("Density") + ggtitle("Distribution of Residuals")
-
-
-#Predicting Probabilities for the test data
-pred <- posterior_linpred(bayes_mod, newdata = test, transform=TRUE)
-fin_pred <- colMeans(pred)
-test_prediction <- as.integer(fin_pred >= 0.5)
-
-confusionMatrix(test$Diabetes,test_prediction)
-
-
-acc_bayes <- confusionMatrix(test$Diabetes,test_prediction)$overall['Accuracy']
-
-plot.roc(test$Diabetes,fin_pred,percent=TRUE,col="#1c61b6", print.auc=TRUE,
-         main = "Area under the curve for Bayesian Logistic Regression")
-
-
-
-#####################################################
-#Decision Trees & Random Forests
-
-#Decision Trees
-set.seed(15689)
-m_dt <- tree(Diabetes ~ ., data = train)
-pred_dt <- predict(m_dt, train, type = "class")
-confusionMatrix(train$Diabetes,pred_dt)[2:3]
-
-
-plot(m_dt)
-text(m_dt, pretty = 0)
-
-
-pred_dt_test <- predict(m_dt, test, type = "class")
-confusionMatrix(test$Diabetes,pred_dt_test)
-
-
-acc_dt <- confusionMatrix(pred_dt_test,test$Diabetes)$overall['Accuracy']
-
-#Random Forest
-set.seed(15689)
-
-opt_mod <- tuneRF(train[-as.numeric(ncol(train))],train$Diabetes,ntreeTry = 150, 
-                  stepFactor = 2, improve = 0.05,trace = T, plot = T, doBest = F)
-
-
-
-mtry_fin <- opt_mod[as.numeric(which.min(opt_mod[,"OOBError"])),"mtry"]
-
-rf_fin <- randomForest(Diabetes~.,data=train, mtry=mtry_fin, ntree=101, 
-                       keep.forest=TRUE, proximity=TRUE, importance=TRUE,test=test)
-
-pred_test <- predict(rf_fin, newdata = test)
-confusionMatrix(test$Diabetes,pred_test)
-
-
-
-acc_rf <- confusionMatrix(test$Diabetes,pred_test)$overall['Accuracy']
-
-par(mfrow=c(1,2))
-varImpPlot(rf_fin,type = 2,main = "Variable Importance",col = 'black')
-plot(rf_fin,main = "Error vs no. of trees grown")
-
-
-#####################################################
-#Model Comparison
-
-accuracy <- data.frame(Model=c("Logistic","Bayesian Logistic","Decision Tree","Random Forest"),Accuracy=c(acc_lg,acc_bayes,acc_dt,acc_rf))
-
-ggplot(accuracy,aes(x=Model,y=Accuracy))+geom_bar(stat='identity')+theme_bw()+
-  ggtitle('Comparison of Model Accuracy')
-
-
+par(fig=c(0.1,0.7,0.3,0.9))
+par(cex=0.7, mai=c(0.1,0.1,0.2,0.1))
+quartz("decision tree", 10,10)
+dev.off()
+?quartz
+head(df2)
+library(rpart)
+rfit = rpart(Year~., data=df2, method="anova", control = rpart.control(minsplit=10))
+#rfit
+# predictors age maiscreat, .... 
+#png("tree.png", width=1000, height=800, antialias="cleartype")
+plot(rfit, uniform=T, main="reg", ,margin=0.2)
+text(rfit,   use.n=TRUE, all= T, cex=0.8) 
 
 
