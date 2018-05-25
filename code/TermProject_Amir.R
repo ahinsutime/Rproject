@@ -497,7 +497,7 @@ plot(getnetwork(result))
 
 storm2$PROPDMG[1:10]
 storm2$PROPDMGEXP[1:10]
-storm2$REMARKS[1]
+#storm2$REMARKS[1]
 LatLong =  paste (as.character((storm2$LONGITUDE)/100 ,':', as.character((storm2$LATITUDE)/100)) )
 LatLong = gsub(" ","", LatLong, fixed = TRUE)
 LatLong[1]
@@ -511,4 +511,63 @@ M1 <- gvisMap(storm2[1:20,], "LatLong" , "Tip",
                            width=800,height=400))
 
 plot(M1) 
+
+str(storm2)
+
+chRemarks = as.character(storm2$REMARKS)
+str(chRemarks)
+library(XML); library(bitops); library(RCurl)
+
+
+str(chRemarks[1:100])
+chRemarks = chRemarks[1]
+#page 4
+#install.packages("NLP")
+#install.packages("tm")
+#install.packages("slam")
+#install.packages("slam")
+library(NLP); library(tm); library(slam)
+# first, build a corpse
+corp <- Corpus(VectorSource(chRemarks))  # building Corpus is step one
+#inspect(corp) # go inside corp
+# eliminating puncionations
+corp = tm_map(corp,removePunctuation)  #
+#inspect(corp)
+# remove particular words
+#corp <- tm_map(corp, removeWords,c("can","far","live",
+#                                   "now","one","say","will","kst","END","Applause"))
+# convert to lower case (frequency of something we dont want to seperate lower and upper case)
+#corp = tm_map(corp,tolower)
+#inspect(corp)
+# Eliminating numbers
+corp = tm_map(corp,removeNumbers)
+#inspect(corp)
+# remove stopwords ( I,  am , are, a about above across after, anyway, they are so common in any text)
+corp = tm_map(corp,removeWords, stopwords("english")) # you can put another language danish korean, ...
+#inspect(corp)
+# remove spaces
+#corp = tm_map(corp, stripWhitespace)
+#inspect(corp)
+# converting to plain text document 
+corp = tm_map(corp,PlainTextDocument)
+#inspect(corp)
+#page 5
+dtm <- DocumentTermMatrix(corp)   #  table for giving frequency
+#inspect(dtm)
+?DocumentTermMatrix
+# # which words apear more than 10
+# findFreqTerms(dtm, lowfreq = 10) 
+# # computerthe frequency of words
+Freq <- sort(colSums(as.matrix(dtm)), decreasing=TRUE)     # in some datasets it is rowSums
+ head(Freq,20)
+ str(Freq)
+
+#page 6  
+#install.packages("wordcloud")  # we can plot it in word cloud (we can also plot it with regular )
+library(RColorBrewer); library(wordcloud)
+wf <- data.frame(Word=names(Freq), Freq=Freq)  # we want to make it again dataframe instead of documenttermmatrix
+wordcloud(words=wf$Word, freq=wf$Freq, min.freq=3,  # the words are wf$Word / give me at least appear 3 times, 
+          random.order=FALSE, rot.per=0.35,  # random order = TRUE it becomes really random, FALSE means you want to have most important words in center
+          colors=brewer.pal(8,"Dark2"))   # rot.per=0.35 I want 70 percent of my data to be rotated vertically
+# I want to use 8 color
 
