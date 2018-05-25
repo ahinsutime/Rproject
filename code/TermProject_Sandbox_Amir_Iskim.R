@@ -377,3 +377,8 @@ plot(rfit, uniform=T, main="reg", ,margin=0.2)
 text(rfit,   use.n=TRUE, all= T, cex=0.8) 
 
 
+str(storm2)
+storm2$BGN_DATE
+which(storm2, )
+
+storm3 <- storm2[,-"Begin.Time"]
