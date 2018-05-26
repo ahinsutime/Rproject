@@ -1,6 +1,7 @@
-dirname(rstudioapi::getSourceEditorContext()$path)
+#dirname(rstudioapi::getSourceEditorContext()$path)
 setwd("/Users/Amirsam/Documents/GitHub/")
 getwd()
+rm(list=ls())
 #rm(list=ls())
 
 
@@ -40,19 +41,18 @@ library(graphics)
 library(lattice)
 library(ggplot2)
 
+#
+#if(!file.exists("repdata-data-StormData.csv.bz2")) {
+#  download.file("https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2FStormData.csv.bz2", destfile = "repdata-data-StormData.csv.bz2", method = "curl")
+#}
 
-if(!file.exists("repdata-data-StormData.csv.bz2")) {
-  download.file("https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2FStormData.csv.bz2", destfile = "repdata-data-StormData.csv.bz2", method = "curl")
-}
+#url <- "https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2FStormData.csv.bz2"
+#bz2.data <- "repdata_data_StormData.csv.bz2"
+#download(url, bz2.data, mode = "wb")  
 
-url <- "https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2FStormData.csv.bz2"
-bz2.data <- "repdata_data_StormData.csv.bz2"
-download(url, bz2.data, mode = "wb")  
-
-bunzip2(bz2.data, "repdata-data-StormData.csv", overwrite=TRUE, remove = FALSE)
+#bunzip2(bz2.data, "repdata-data-StormData.csv", overwrite=TRUE, remove = FALSE)
 
 storm <- read.table("repdata-data-StormData.csv", sep = ",", header = TRUE)
-
 
 storm1 = storm
 
@@ -141,6 +141,7 @@ storm2 <- storm1
 
 head(storm2)
 str(storm2)
+tail(storm2)
 
 
 ## PROPDMG is:  "Property damage in whole numbers and hundredths"
@@ -381,9 +382,75 @@ head(df2)
 library(rpart)
 rfit = rpart(Year~., data=df2, method="anova", control = rpart.control(minsplit=10))
 #rfit
-# predictors age maiscreat, .... 
-#png("tree.png", width=1000, height=800, antialias="cleartype")
+
 plot(rfit, uniform=T, main="reg", ,margin=0.2)
 text(rfit,   use.n=TRUE, all= T, cex=0.8) 
+
+library(bnlearn)
+#learning a beysian network from data
+bnhc <- hc(df2, score="bic-g")# based on gausian 
+#bnhc <- hc(marks, score="bic")# not work because it is for factor data
+bnhc
+bnhc$nodes
+bnhc$arcs
+
+library(igraph)
+edges=arcs(bnhc)
+nodes=nodes(bnhc)
+net <- graph.data.frame(edges,directed=T,vertices=nodes)
+plot(net,vertex.label=V(net)$name,vertex.size=40,
+     edge.arrow.size=0.3,vertex.color="cyan",
+     edge.color="black")
+
+
+library(PerformanceAnalytics) # look at how they are related, they are kind of related by with correlation you cannot find which one is the reason for the other one
+chart.Correlation(marks,pch=21,histogram=TRUE)
+
+str(storm2)
+
+colIndex=c( #which(colnames(storm2) == "LATITUDE"),
+#which(colnames(storm2) == "LONGITUDE"),
+which(colnames(storm2) == "CROPDMG"),
+which(colnames(storm2) == "INJURIES"),
+which(colnames(storm2) == "FATALITIES"),
+#which(colnames(storm2) == "PROPDMG"),
+#which(colnames(storm2) == "STATE"),
+which(colnames(storm2) == "EVTYPE"))
+
+
+storm3 = storm2[,colIndex]
+str(storm3)
+storm3
+# having continues and factor, we have to use different set of functions
+library(deal) # package for having combination factor and continues values
+str(storm3)
+storm3.nw <- network(storm3)          # specify prior network
+
+storm3.prior <- jointprior(storm3.nw) # make joint prior distribution
+# learn estimate parameters
+storm3.nw <- learn(storm3.nw,storm3,storm3.prior)$nw
+storm3.nw
+
+result <- heuristic(initnw=storm3.nw, data=storm3, prior=storm3.prior,
+                    restart=2, degree=10, trace=FALSE)
+win.graph(width=7,height=7)
+plot(getnetwork(result))
+
+# # why some nodes are black, blacks are factors, and white ones are continues
+# # look at BMI effected by gender, kol (kolestrol)
+# #page 18
+# library(igraph)  # get adjency matrix and plot it again
+# mx <- matrix(c(0,0,1,0,0,0,0,0,0, 0,0,0,1,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,
+#                0,0,1,0,0,0,0,0,0, 1,0,0,0,0,1,0,0,0, 0,0,0,0,0,0,1,0,0,
+#                0,0,0,0,0,0,0,1,0, 1,1,0,1,1,1,0,0,0, 1,1,0,0,1,1,1,0,0),
+#              nrow=9, byrow=T, dimnames=list(NULL,names(ksl)))
+# knet <- graph.adjacency(mx)
+# V(knet)$color <- c(rep("cornsilk",4),rep("cyan",5))
+# plot(knet,edge.arrow.size=0.4,edge.color="gray47",vertex.label.color="black",
+#      vertex.label.cex=1.2,vertex.size=30,layout=layout.circle)
+
+
+
+
 
 
