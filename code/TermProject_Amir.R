@@ -493,7 +493,22 @@ plot(getnetwork(result))
 #      vertex.label.cex=1.2,vertex.size=30,layout=layout.circle)
 
 
+# Mapping
+
+storm2$PROPDMG[1:10]
+storm2$PROPDMGEXP[1:10]
+storm2$REMARKS[1]
+LatLong =  paste (as.character((storm2$LONGITUDE)/100 ,':', as.character((storm2$LATITUDE)/100)) )
+LatLong = gsub(" ","", LatLong, fixed = TRUE)
+LatLong[1]
+storm2$LatLong = LatLong
+storm2$Tip = storm2$FATALITIES
 
 
+M1 <- gvisMap(storm2[1:20,], "LatLong" , "Tip",
+              options=list(showTip=TRUE, showLine=TRUE, enableScrollWheel=TRUE,
+                           mapType='hybrid', useMapTypeControl=TRUE,
+                           width=800,height=400))
 
+plot(M1) 
 
