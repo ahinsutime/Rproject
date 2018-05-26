@@ -331,3 +331,9 @@ with(df, scatter.smooth(Fatalities, log10(Costs), pch = 20, col = "red", main = 
 ## Log(Costs) of Injuries
 
 with(df, scatter.smooth(Injuries, log10(Costs), pch = 20, col = "green", main = "Log10(Costs) of Injuries"))
+
+
+
+
+
+
