@@ -1,7 +1,6 @@
 #dirname(rstudioapi::getSourceEditorContext()$path)
-setwd("/Users/Amirsam/Documents/GitHub/")
+setwd("D:/Rdata")
 getwd()
-rm(list=ls())
 #rm(list=ls())
 
 
@@ -11,48 +10,39 @@ rm(list=ls())
 library(ggplot2)
 library(dplyr)
 library(readr)
-#install.packages("corrplot")
 library(corrplot)
 library(lattice)
 library(caret)
-#install.packages("ROCR")
 library(gplots)
 library(ROCR)
 library(tree)
 library(randomForest)
-#install.packages("rstanarm")
-#install.packages("ggridges")
 library(Rcpp)
 library(rstanarm)
 library(pROC)
-
-
 library(data.table)
-#install.packages("R.utils")
 library(R.oo)
 library(R.methodsS3)
 library(R.utils) 
-#install.packages("downloader")
 library(downloader)
 library(lubridate)
 library(plyr)
 library(stats)
 library(graphics)
-library(lattice)
-library(ggplot2)
 
 
-# if(!file.exists("repdata-data-StormData.csv.bz2")) {
-#   download.file("https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2FStormData.csv.bz2", destfile = "repdata-data-StormData.csv.bz2", method = "curl")
-# }
-# 
-# url <- "https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2FStormData.csv.bz2"
-# bz2.data <- "repdata_data_StormData.csv.bz2"
-# download(url, bz2.data, mode = "wb")  
-# 
-# bunzip2(bz2.data, "repdata-data-StormData.csv", overwrite=TRUE, remove = FALSE)
+if(!file.exists("repdata-data-StormData.csv.bz2")) {
+  download.file("https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2FStormData.csv.bz2", destfile = "repdata-data-StormData.csv.bz2", method = "libcurl")
+}
+
+url <- "https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2FStormData.csv.bz2"
+bz2.data <- "repdata_data_StormData.csv.bz2"
+download(url, bz2.data, mode = "wb")  
+
+bunzip2(bz2.data, "repdata-data-StormData.csv", overwrite=TRUE, remove = FALSE)
 
 storm <- read.table("repdata-data-StormData.csv", sep = ",", header = TRUE)
+
 
 storm1 = storm
 
@@ -141,7 +131,6 @@ storm2 <- storm1
 
 head(storm2)
 str(storm2)
-tail(storm2)
 
 
 ## PROPDMG is:  "Property damage in whole numbers and hundredths"
@@ -220,7 +209,7 @@ summary(storm2$crop.costs)
 summary(storm2$total.costs)
 
 #First Question: Across the United States, which types of events (as indicated in the EVTYPE variable) are most harmful with respect to population health?
-  
+
 #For resolving this question, I show first, how Fatalities and Injuries happened per year, during the period, and after, I show how Fatalities and Injuries happened across United States, per Event.
 #1. Estimating total fatalities and injuries during the period, per year
 library(data.table)
@@ -235,55 +224,12 @@ head(injuries.year)
 morbimortality.year <- data.frame(cbind(fatalities.year, injuries.year))
 
 
-# State aggregation
-
-library(data.table)
-fatalities.STATE <- aggregate(storm1$FATALITIES, by = list(storm1$STATE), FUN = sum)
-colnames(fatalities.STATE) <- c("State", "Fatalities")
-head(fatalities.STATE)
-
-injuries.STATE <- aggregate(storm1$INJURIES, by = list(storm1$STATE), FUN = sum)
-colnames(injuries.STATE) <- c("State", "Injuries")
-head(injuries.STATE)
-
-morbimortality.STATE <- data.frame(cbind(fatalities.STATE, injuries.STATE))
-
-morbimortality.STATEFat.sorted <- morbimortality.STATE[order(-morbimortality.STATE$Fatalities, na.last=TRUE), ][1:30, ]
-morbimortality.STATEIn.sorted <- morbimortality.STATE[order(-morbimortality.STATE$Injuries, na.last=TRUE), ][1:30, ]
-head(morbimortality.STATEFat.sorted)
-head(morbimortality.STATEIn.sorted)
-
-par(mfrow = c(2, 2), mar = c(11.5, 5, 4, 2), las = 3, cex = 0.5, cex.main = 1.4, cex.lab = 1.2)
-with(morbimortality.STATEFat.sorted, barplot(Fatalities, names.arg = morbimortality.STATEFat.sorted$State, col = "red", ylab = "Fatalities", main = "Total Fatalities"))
-with(morbimortality.STATEIn.sorted, barplot(Injuries, names.arg = morbimortality.STATEIn.sorted$State, col = "green", ylab = "Injuries", main = "Total Injuries"))
-
-reg <- lm(Fatalities ~ State, data = morbimortality.STATE)
-with(morbimortality.STATE, plot(State, Fatalities, ylab = "Fatalities", pch = 19, col ="red", main = "Total Fatalities per state"))
-with(morbimortality.STATE, plot(State, Fatalities))
-par(xpd = FALSE)
-abline(reg, col="black")
-
-
-
-## Fatalities related with Weather events, USA, 1950-2011
-reg <- lm(Fatalities ~ Year, data = morbimortality.year)
-with(morbimortality.year, plot(Year, Fatalities, ylab = "Fatalities", xlim = c(1945, 2015), ylim = c(0,1200), pch = 19, col ="red", main = "Total Fatalities per year"))
-par(xpd = FALSE)
-abline(reg, col="black")
-
-
 
 
 ## total cases of mortality and morbidity per year
 
 morbimortality.year$Total <- as.data.table(morbimortality.year$Fatalities + morbimortality.year$Injuries)
 head(morbimortality.year)
-
-## total cases of mortality and morbidity per state
-
-morbimortality.STATE$Total <- as.data.table(morbimortality.STATE$Fatalities + morbimortality.STATE$Injuries)
-head(morbimortality.STATE)
-
 
 # 2. Estimating total fatalities and injuries, per event type
 
@@ -386,188 +332,8 @@ with(df, scatter.smooth(Fatalities, log10(Costs), pch = 20, col = "red", main = 
 
 with(df, scatter.smooth(Injuries, log10(Costs), pch = 20, col = "green", main = "Log10(Costs) of Injuries"))
 
-head(df)
-head(storm2)
-
-df2 = df[,-3]
-head(df2)
-
-rf = randomForest(Costs~., data=df2, importance =T)
-
-print(rf)  # it is normal to have a different value because each computer has diferent random value 
-plot(rf, main="Random Forest Regression for Boston")
-
-length(rf$mse)
-min(rf$mse)
-mean(rf$mse)
-head(rf$mse)
-tail(rf$mse) 
-
-n <- which.min(rf$mse)  # give me the index which mse error is minimum
-n
-rf2 <- randomForest(Costs~., data=df2, 
-                    ntree=n, importance=TRUE, na.action=na.omit)  # now you can say the number of trees is the optimal one we found
-?randomForest
-print(rf2)
-# Importance of variables: higher value mean more important
-#  this importance will give you which feature is important in deciding this tree, the features at the top are important because bigger dimension/ which features come to the top ? (important) /   IncMSE: if you don't use this feature how much error will increase in your dataset / rm has the highest values, number of rooms is so important (most people use the once) / IncNodePurity (how much subtree really about that tree for example rm has the most sub trees and so important)
-importance(rf2)    
-varImpPlot(rf2, scale=T, main = "Variable Importance Plot")
-
-head(df2)
-par(mfrow=c(1,1))
-par(fig=c(0.1,0.7,0.3,0.9))
-par(cex=0.7, mai=c(0.1,0.1,0.2,0.1))
-quartz("decision tree", 10,10)
-dev.off()
-?quartz
-head(df2)
-library(rpart)
-rfit = rpart(Year~., data=df2, method="anova", control = rpart.control(minsplit=10))
-#rfit
-
-plot(rfit, uniform=T, main="reg", ,margin=0.2)
-text(rfit,   use.n=TRUE, all= T, cex=0.8) 
-
-library(bnlearn)
-#learning a beysian network from data
-bnhc <- hc(df2, score="bic-g")# based on gausian 
-#bnhc <- hc(marks, score="bic")# not work because it is for factor data
-bnhc
-bnhc$nodes
-bnhc$arcs
-
-library(igraph)
-edges=arcs(bnhc)
-nodes=nodes(bnhc)
-net <- graph.data.frame(edges,directed=T,vertices=nodes)
-plot(net,vertex.label=V(net)$name,vertex.size=40,
-     edge.arrow.size=0.3,vertex.color="cyan",
-     edge.color="black")
 
 
-library(PerformanceAnalytics) # look at how they are related, they are kind of related by with correlation you cannot find which one is the reason for the other one
-chart.Correlation(marks,pch=21,histogram=TRUE)
-
-str(storm2)
-
-colIndex=c( #which(colnames(storm2) == "LATITUDE"),
-#which(colnames(storm2) == "LONGITUDE"),
-which(colnames(storm2) == "CROPDMG"),
-which(colnames(storm2) == "INJURIES"),
-which(colnames(storm2) == "FATALITIES"),
-#which(colnames(storm2) == "PROPDMG"),
-#which(colnames(storm2) == "STATE"),
-which(colnames(storm2) == "EVTYPE"))
 
 
-storm3 = storm2[1:10,colIndex]
-str(storm3)
-storm3
-# having continues and factor, we have to use different set of functions
-library(deal) # package for having combination factor and continues values
-str(storm3)
-storm3.nw <- network(storm3)          # specify prior network
-
-storm3.prior <- jointprior(storm3.nw) # make joint prior distribution
-# learn estimate parameters
-storm3.nw <- learn(storm3.nw,storm3,storm3.prior)$nw
-storm3.nw
-
-result <- heuristic(initnw=storm3.nw, data=storm3, prior=storm3.prior,
-                    restart=2, degree=10, trace=FALSE)
-win.graph(width=7,height=7)
-plot(getnetwork(result))
-
-# # why some nodes are black, blacks are factors, and white ones are continues
-# # look at BMI effected by gender, kol (kolestrol)
-# #page 18
-# library(igraph)  # get adjency matrix and plot it again
-# mx <- matrix(c(0,0,1,0,0,0,0,0,0, 0,0,0,1,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,
-#                0,0,1,0,0,0,0,0,0, 1,0,0,0,0,1,0,0,0, 0,0,0,0,0,0,1,0,0,
-#                0,0,0,0,0,0,0,1,0, 1,1,0,1,1,1,0,0,0, 1,1,0,0,1,1,1,0,0),
-#              nrow=9, byrow=T, dimnames=list(NULL,names(ksl)))
-# knet <- graph.adjacency(mx)
-# V(knet)$color <- c(rep("cornsilk",4),rep("cyan",5))
-# plot(knet,edge.arrow.size=0.4,edge.color="gray47",vertex.label.color="black",
-#      vertex.label.cex=1.2,vertex.size=30,layout=layout.circle)
-
-
-# Mapping
-
-storm2$PROPDMG[1:10]
-storm2$PROPDMGEXP[1:10]
-#storm2$REMARKS[1]
-LatLong =  paste (as.character((storm2$LONGITUDE)/100 ,':', as.character((storm2$LATITUDE)/100)) )
-LatLong = gsub(" ","", LatLong, fixed = TRUE)
-LatLong[1]
-storm2$LatLong = LatLong
-storm2$Tip = storm2$FATALITIES
-
-
-M1 <- gvisMap(storm2[1:20,], "LatLong" , "Tip",
-              options=list(showTip=TRUE, showLine=TRUE, enableScrollWheel=TRUE,
-                           mapType='hybrid', useMapTypeControl=TRUE,
-                           width=800,height=400))
-
-plot(M1) 
-
-str(storm2)
-
-chRemarks = as.character(storm2$REMARKS)
-str(chRemarks)
-library(XML); library(bitops); library(RCurl)
-
-
-str(chRemarks[1:100])
-chRemarks = chRemarks[1]
-#page 4
-#install.packages("NLP")
-#install.packages("tm")
-#install.packages("slam")
-#install.packages("slam")
-library(NLP); library(tm); library(slam)
-# first, build a corpse
-corp <- Corpus(VectorSource(chRemarks))  # building Corpus is step one
-#inspect(corp) # go inside corp
-# eliminating puncionations
-corp = tm_map(corp,removePunctuation)  #
-#inspect(corp)
-# remove particular words
-#corp <- tm_map(corp, removeWords,c("can","far","live",
-#                                   "now","one","say","will","kst","END","Applause"))
-# convert to lower case (frequency of something we dont want to seperate lower and upper case)
-#corp = tm_map(corp,tolower)
-#inspect(corp)
-# Eliminating numbers
-corp = tm_map(corp,removeNumbers)
-#inspect(corp)
-# remove stopwords ( I,  am , are, a about above across after, anyway, they are so common in any text)
-corp = tm_map(corp,removeWords, stopwords("english")) # you can put another language danish korean, ...
-#inspect(corp)
-# remove spaces
-#corp = tm_map(corp, stripWhitespace)
-#inspect(corp)
-# converting to plain text document 
-corp = tm_map(corp,PlainTextDocument)
-#inspect(corp)
-#page 5
-dtm <- DocumentTermMatrix(corp)   #  table for giving frequency
-#inspect(dtm)
-?DocumentTermMatrix
-# # which words apear more than 10
-# findFreqTerms(dtm, lowfreq = 10) 
-# # computerthe frequency of words
-Freq <- sort(colSums(as.matrix(dtm)), decreasing=TRUE)     # in some datasets it is rowSums
- head(Freq,20)
- str(Freq)
-
-#page 6  
-#install.packages("wordcloud")  # we can plot it in word cloud (we can also plot it with regular )
-library(RColorBrewer); library(wordcloud)
-wf <- data.frame(Word=names(Freq), Freq=Freq)  # we want to make it again dataframe instead of documenttermmatrix
-wordcloud(words=wf$Word, freq=wf$Freq, min.freq=3,  # the words are wf$Word / give me at least appear 3 times, 
-          random.order=FALSE, rot.per=0.35,  # random order = TRUE it becomes really random, FALSE means you want to have most important words in center
-          colors=brewer.pal(8,"Dark2"))   # rot.per=0.35 I want 70 percent of my data to be rotated vertically
-# I want to use 8 color
 

@@ -1,5 +1,6 @@
 #dirname(rstudioapi::getSourceEditorContext()$path)
-setwd("/Users/Amirsam/Documents/GitHub/")
+#setwd("/Users/Amirsam/Documents/GitHub/")
+setwd("D:/Rdata")
 getwd()
 rm(list=ls())
 #rm(list=ls())
@@ -41,22 +42,24 @@ library(graphics)
 library(lattice)
 library(ggplot2)
 
+#
+#if(!file.exists("repdata-data-StormData.csv.bz2")) {
+#  download.file("https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2FStormData.csv.bz2", destfile = "repdata-data-StormData.csv.bz2", method = "curl")
+#}
 
-# if(!file.exists("repdata-data-StormData.csv.bz2")) {
-#   download.file("https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2FStormData.csv.bz2", destfile = "repdata-data-StormData.csv.bz2", method = "curl")
-# }
-# 
-# url <- "https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2FStormData.csv.bz2"
-# bz2.data <- "repdata_data_StormData.csv.bz2"
-# download(url, bz2.data, mode = "wb")  
-# 
-# bunzip2(bz2.data, "repdata-data-StormData.csv", overwrite=TRUE, remove = FALSE)
+#url <- "https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2FStormData.csv.bz2"
+#bz2.data <- "repdata_data_StormData.csv.bz2"
+#download(url, bz2.data, mode = "wb")  
+
+#bunzip2(bz2.data, "repdata-data-StormData.csv", overwrite=TRUE, remove = FALSE)
 
 storm <- read.table("repdata-data-StormData.csv", sep = ",", header = TRUE)
 
+str(storm)
+
 storm1 = storm
 
-
+str(storm1)
 
 storm1$Begin.Time <- as.POSIXct(strptime(storm1$BGN_DATE, format ="%m/%d/%Y %H:%M:%S"))
 
@@ -64,7 +67,9 @@ storm1$Begin.Time <- as.POSIXct(strptime(storm1$BGN_DATE, format ="%m/%d/%Y %H:%
 
 storm1$Year.Begin <- year(as.Date(storm1$Begin.Time))
 
-
+(storm$LATITUDE)
+(storm$LONGITUDE)
+storm$REMARKS
 
 ## Changing to AVALANCHE
 storm1 <- transform(storm1,
@@ -218,6 +223,7 @@ storm2$total.costs <- storm2$property.costs + storm2$crop.costs
 summary(storm2$property.costs)
 summary(storm2$crop.costs)
 summary(storm2$total.costs)
+str(storm1)
 
 #First Question: Across the United States, which types of events (as indicated in the EVTYPE variable) are most harmful with respect to population health?
   
@@ -235,55 +241,12 @@ head(injuries.year)
 morbimortality.year <- data.frame(cbind(fatalities.year, injuries.year))
 
 
-# State aggregation
-
-library(data.table)
-fatalities.STATE <- aggregate(storm1$FATALITIES, by = list(storm1$STATE), FUN = sum)
-colnames(fatalities.STATE) <- c("State", "Fatalities")
-head(fatalities.STATE)
-
-injuries.STATE <- aggregate(storm1$INJURIES, by = list(storm1$STATE), FUN = sum)
-colnames(injuries.STATE) <- c("State", "Injuries")
-head(injuries.STATE)
-
-morbimortality.STATE <- data.frame(cbind(fatalities.STATE, injuries.STATE))
-
-morbimortality.STATEFat.sorted <- morbimortality.STATE[order(-morbimortality.STATE$Fatalities, na.last=TRUE), ][1:30, ]
-morbimortality.STATEIn.sorted <- morbimortality.STATE[order(-morbimortality.STATE$Injuries, na.last=TRUE), ][1:30, ]
-head(morbimortality.STATEFat.sorted)
-head(morbimortality.STATEIn.sorted)
-
-par(mfrow = c(2, 2), mar = c(11.5, 5, 4, 2), las = 3, cex = 0.5, cex.main = 1.4, cex.lab = 1.2)
-with(morbimortality.STATEFat.sorted, barplot(Fatalities, names.arg = morbimortality.STATEFat.sorted$State, col = "red", ylab = "Fatalities", main = "Total Fatalities"))
-with(morbimortality.STATEIn.sorted, barplot(Injuries, names.arg = morbimortality.STATEIn.sorted$State, col = "green", ylab = "Injuries", main = "Total Injuries"))
-
-reg <- lm(Fatalities ~ State, data = morbimortality.STATE)
-with(morbimortality.STATE, plot(State, Fatalities, ylab = "Fatalities", pch = 19, col ="red", main = "Total Fatalities per state"))
-with(morbimortality.STATE, plot(State, Fatalities))
-par(xpd = FALSE)
-abline(reg, col="black")
-
-
-
-## Fatalities related with Weather events, USA, 1950-2011
-reg <- lm(Fatalities ~ Year, data = morbimortality.year)
-with(morbimortality.year, plot(Year, Fatalities, ylab = "Fatalities", xlim = c(1945, 2015), ylim = c(0,1200), pch = 19, col ="red", main = "Total Fatalities per year"))
-par(xpd = FALSE)
-abline(reg, col="black")
-
-
 
 
 ## total cases of mortality and morbidity per year
 
 morbimortality.year$Total <- as.data.table(morbimortality.year$Fatalities + morbimortality.year$Injuries)
 head(morbimortality.year)
-
-## total cases of mortality and morbidity per state
-
-morbimortality.STATE$Total <- as.data.table(morbimortality.STATE$Fatalities + morbimortality.STATE$Injuries)
-head(morbimortality.STATE)
-
 
 # 2. Estimating total fatalities and injuries, per event type
 
@@ -461,11 +424,12 @@ which(colnames(storm2) == "FATALITIES"),
 which(colnames(storm2) == "EVTYPE"))
 
 
-storm3 = storm2[1:10,colIndex]
+storm3 = storm2[,colIndex]
 str(storm3)
 storm3
 # having continues and factor, we have to use different set of functions
 library(deal) # package for having combination factor and continues values
+#install.packages("deal")
 str(storm3)
 storm3.nw <- network(storm3)          # specify prior network
 
@@ -492,82 +456,43 @@ plot(getnetwork(result))
 # plot(knet,edge.arrow.size=0.4,edge.color="gray47",vertex.label.color="black",
 #      vertex.label.cex=1.2,vertex.size=30,layout=layout.circle)
 
-
-# Mapping
-
-storm2$PROPDMG[1:10]
-storm2$PROPDMGEXP[1:10]
-#storm2$REMARKS[1]
-LatLong =  paste (as.character((storm2$LONGITUDE)/100 ,':', as.character((storm2$LATITUDE)/100)) )
-LatLong = gsub(" ","", LatLong, fixed = TRUE)
-LatLong[1]
-storm2$LatLong = LatLong
-storm2$Tip = storm2$FATALITIES
-
-
-M1 <- gvisMap(storm2[1:20,], "LatLong" , "Tip",
-              options=list(showTip=TRUE, showLine=TRUE, enableScrollWheel=TRUE,
-                           mapType='hybrid', useMapTypeControl=TRUE,
-                           width=800,height=400))
-
-plot(M1) 
-
 str(storm2)
+head(storm2$REMARKS, 6)
+test <- as.character(storm2$REMARKS)
+test[1]
 
-chRemarks = as.character(storm2$REMARKS)
-str(chRemarks)
-library(XML); library(bitops); library(RCurl)
-
-
-str(chRemarks[1:100])
-chRemarks = chRemarks[1]
-#page 4
 #install.packages("NLP")
 #install.packages("tm")
-#install.packages("slam")
-#install.packages("slam")
-library(NLP); library(tm); library(slam)
-# first, build a corpse
-corp <- Corpus(VectorSource(chRemarks))  # building Corpus is step one
-#inspect(corp) # go inside corp
-# eliminating puncionations
-corp = tm_map(corp,removePunctuation)  #
-#inspect(corp)
-# remove particular words
-#corp <- tm_map(corp, removeWords,c("can","far","live",
-#                                   "now","one","say","will","kst","END","Applause"))
-# convert to lower case (frequency of something we dont want to seperate lower and upper case)
-#corp = tm_map(corp,tolower)
-#inspect(corp)
-# Eliminating numbers
-corp = tm_map(corp,removeNumbers)
-#inspect(corp)
-# remove stopwords ( I,  am , are, a about above across after, anyway, they are so common in any text)
-corp = tm_map(corp,removeWords, stopwords("english")) # you can put another language danish korean, ...
-#inspect(corp)
-# remove spaces
-#corp = tm_map(corp, stripWhitespace)
-#inspect(corp)
-# converting to plain text document 
-corp = tm_map(corp,PlainTextDocument)
-#inspect(corp)
-#page 5
-dtm <- DocumentTermMatrix(corp)   #  table for giving frequency
-#inspect(dtm)
-?DocumentTermMatrix
-# # which words apear more than 10
-# findFreqTerms(dtm, lowfreq = 10) 
-# # computerthe frequency of words
-Freq <- sort(colSums(as.matrix(dtm)), decreasing=TRUE)     # in some datasets it is rowSums
- head(Freq,20)
- str(Freq)
+library(NLP); library(tm)
 
-#page 6  
-#install.packages("wordcloud")  # we can plot it in word cloud (we can also plot it with regular )
+star <- test[1]
+
+corp <- Corpus(VectorSource(star))
+#inspect(corp)
+corp = tm_map(corp,removePunctuation)
+corp = tm_map(corp,tolower)
+corp = tm_map(corp,removeNumbers)
+corp = tm_map(corp,removeWords, stopwords("english"))
+corp <- tm_map(corp, removeWords,c("can","far","live",
+                                   "now","one","say","will"))
+#inspect(corp)
+corp = tm_map(corp,PlainTextDocument)
+corp
+#inspect(corp) #Not displaying the text
+
+#page 5
+dtm <- DocumentTermMatrix(corp)  
+Freq <- sort(colSums(as.matrix(dtm)), decreasing=TRUE)  
+head(Freq,20)
+
+#page 6
+#install.packages("wordcloud")
 library(RColorBrewer); library(wordcloud)
-wf <- data.frame(Word=names(Freq), Freq=Freq)  # we want to make it again dataframe instead of documenttermmatrix
-wordcloud(words=wf$Word, freq=wf$Freq, min.freq=3,  # the words are wf$Word / give me at least appear 3 times, 
-          random.order=FALSE, rot.per=0.35,  # random order = TRUE it becomes really random, FALSE means you want to have most important words in center
-          colors=brewer.pal(8,"Dark2"))   # rot.per=0.35 I want 70 percent of my data to be rotated vertically
-# I want to use 8 color
+#install.packages("RColorBrewer")
+#install.packages("wordcloud")
+wf <- data.frame(Word=names(Freq), Freq=Freq)
+wordcloud(words=wf$Word, freq=wf$Freq, min.freq=3,
+          random.order=FALSE, rot.per=0.35,
+          colors=brewer.pal(8,"Dark2"))
+
 
