@@ -8,32 +8,47 @@ setwd("C:/Rdata")
 #githubinstall("https://github.com/awesomedata/awesome-public-datasets")
 
 
-###############################################################################################
-library(data.table)
-
+############1.Preparing data###################
+#**(1)Install and load packages----------------
+#install & load
+ipak <- function(pkg){
+  new.pkg <- pkg[!(pkg %in% installed.packages()[, "Package"])]
+  if (length(new.pkg)) 
+    install.packages(new.pkg, dependencies = TRUE)
+  sapply(pkg, require, character.only = TRUE)
+}
+packages <- c("R.utils", "data.table", "downloader", "lubridate", "plyr")
+ipak(packages)
+library(dplyr)
+#**(2)Download data----------------
 #fread is much much much faster than read. Let's use fread to read csv datasets
-
-#Datasets of crime
-
-globalTerrorism <- fread.csv('globalterrorismdb_0617dist.csv', stringsAsFactors=TRUE)
-gunViolence <- fread.csv('gun-violence-data_01-2013_03-2018.csv', stringsAsFactors=TRUE)
-#globalTerrorism <- read.csv('globalterrorismdb_0617dist.csv', header=TRUE)
-#gunViolence <- read.csv('gun-violence-data_01-2013_03-2018.csv', header=TRUE)
-
-#Datasets of climate
-
-AirPollution <- fread.csv('Facility Air Pollution Dataset - All Facilities.csv', stringsAsFactors=TRUE)
-GlobalTemperature <- fread.csv('GlobalTemperatures.csv', stringsAsFactors=TRUE)
-GlobalLandTemp_State <- fread.csv('GlobalLandTemperaturesByState.csv', stringsAsFactors=TRUE)
-GlobalLandTemp_MajorCity <- fread.csv('GlobalLandTemperaturesByMajorCity.csv', stringsAsFactors=TRUE)
-GlobalLandTemp_Country <- fread.csv('GlobalLandTemperaturesByCountry.csv', stringsAsFactors=TRUE)
-GlobalLandTemp_City <- fread("GlobalLandTemperaturesByCity.csv", stringsAsFactors=TRUE)
-#AirPollution <- read.csv('Facility Air Pollution Dataset - All Facilities.csv', header=TRUE)
-#GlobalTemperature <- read.csv('GlobalTemperatures.csv', header=TRUE)
-#GlobalLandTemp_State <- read.csv('GlobalLandTemperaturesByState.csv', header=TRUE)
-#GlobalLandTemp_MajorCity <- read.csv('GlobalLandTemperaturesByMajorCity.csv', header=TRUE)
-#GlobalLandTemp_Country <- read.csv('GlobalLandTemperaturesByCountry.csv', header=TRUE)
-#GlobalLandTemp_City <- read.csv('GlobalLandTemperaturesByCity.csv', header=TRUE)
+if(!file.exists("repdata-data-StormData.csv.bz2")) {
+download.file("https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2FStormData.csv.bz2", destfile = "repdata-data-StormData.csv.bz2", method = "curl")
+}
+url <- "https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2FStormData.csv.bz2"
+bz2.data <- "repdata_data_StormData.csv.bz2"
+download(url, bz2.data, mode = "wb")  
+bunzip2(bz2.data, "repdata-data-StormData.csv", overwrite=TRUE, remove = FALSE)
+storm <- fread("repdata-data-StormData.csv", sep = ",", header = TRUE)
+storm1 = storm
+#**(3)Process data----------------
+#subset relevant columns
+#remove state data, remarks, refnum
+storm2 <- storm1[,-c(5:6,14:15,31,36:37)]
+#**(5)change "", "+","-","?" to NA----------------
+storm2[ storm2 == "" ] <- NA
+storm3=storm2
+storm3[ storm3 == "+" ] <- NA
+storm4=storm3
+storm4[ storm4 == "-" ] <- NA
+storm5=storm4
+storm5[ storm5 == "?" ] <- NA
+na_count <-sapply(storm2, function(y) sum(length(which(is.na(y)))))
+na_count2 <-sapply(storm3, function(y) sum(length(which(is.na(y)))))
+na_count3 <-sapply(storm4, function(y) sum(length(which(is.na(y)))))
+na_count4 <-sapply(storm5, function(y) sum(length(which(is.na(y)))))
+na_count_tab <- data.frame(na_count,na_count2,na_count3,na_count4)
+na_count_tab
 
 ###############################################################################################
 
