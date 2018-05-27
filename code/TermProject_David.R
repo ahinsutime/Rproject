@@ -50,6 +50,34 @@ na_count4 <-sapply(storm5, function(y) sum(length(which(is.na(y)))))
 na_count_tab <- data.frame(na_count,na_count2,na_count3,na_count4)
 na_count_tab
 
+############2.Preparing data###################
+##resources:
+#http://rstudio-pubs-static.s3.amazonaws.com/25710_7f98ce257ba941a3a9bd5e73186dc730.html
+#**(1)Basic statistics
+storm5
+
+#**(2)Which events where the most fatals
+storm5<-transform(storm5, EVTYPE = factor(EVTYPE)) #EVTYPE as factors
+storm5$EVTYPE <- toupper(storm5$EVTYPE)
+unique(storm5$EVTYPE)#total of 898 events
+#Group event types by contents
+storm5$EVTYPE[grep("*TORNADO*", storm5$EVTYPE)] <- "TORNADO"
+storm5$EVTYPE[grep("*HURRICANE*|*TYPHOON*", storm5$EVTYPE)] <- "HURRICANE"
+storm5$EVTYPE[grep("*WIND*", storm5$EVTYPE)] <- "WIND"
+storm5$EVTYPE[grep("*FIRE*", storm5$EVTYPE)] <- "FIRE"
+storm5$EVTYPE[grep("*STORM*|*GLAZE*|*HAIL*|*WETNESS*|*LIGHTNING*|*RAIN*|*BLIZZARD*", storm5$EVTYPE)] <- "STORM"
+storm5$EVTYPE[grep("*COLD*|*LOW TEMPERATURE*|*WINTRY*|*FREEZE*", storm5$EVTYPE)] <- "COLD"
+storm5$EVTYPE[grep("*SNOW*", storm5$EVTYPE)] <- "SNOW"
+storm5$EVTYPE[grep("*FLOOD*|*STREAM*|*HIGH WATER*", storm5$EVTYPE)] <- "FLOOD"
+storm5$EVTYPE[grep("*HEAT*|*HOT*", storm5$EVTYPE)] <- "HEAT"
+storm5$EVTYPE[grep("*SURF*|*SEAS*|*MARINE*|*CURRENT*|*TSUNAMI", storm5$EVTYPE)] <- "SURF"
+storm5$EVTYPE[grep("*FOG*", storm5$EVTYPE)] <- "FOG"
+storm5$EVTYPE[grep("*DRY*|*DROUGHT*", storm5$EVTYPE)] <- "DRY"
+storm5$EVTYPE[grep("*LANDSLIDE*|*LAND*|*AVALANCHE*|*SLIDE*", storm5$EVTYPE)] <- "LANDSLIDE"
+storm5$EVTYPE[grep("*ICE*|*ICY*|*FROST*", storm5$EVTYPE)] <- "ICE"
+
+
+
 ###############################################################################################
 
 
