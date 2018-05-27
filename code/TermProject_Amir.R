@@ -571,3 +571,182 @@ wordcloud(words=wf$Word, freq=wf$Freq, min.freq=3,  # the words are wf$Word / gi
           colors=brewer.pal(8,"Dark2"))   # rot.per=0.35 I want 70 percent of my data to be rotated vertically
 # I want to use 8 color
 
+
+
+#--------------------   Crime in Korea
+# 1st Research question:
+# In which day in Daejeon, the most crimes are happened?
+
+Daejeon_Crime_Day = read.csv("Daejeon_Crime_Day.csv" , header = T)
+df = Daejeon_Crime_Day[,2:8]
+clean = function(df){
+  as.numeric( gsub(",","",df) )
+}
+df = sapply(df, clean)
+df = as.data.frame(df)
+rownames(df) = Daejeon_Crime_Day[,1]
+df
+str(df)
+df2 = as.matrix(df)
+class(df2)
+df2 = t(df2)
+df2
+df2 = as.data.frame(df2)
+df2
+str(df2)
+df2[,1]
+df2$Total = apply(df2, 1, sum)
+df2
+df2$City = as.factor(rep("Daejeon", 7))
+df2
+str(df2)
+df2 = df2[order(-df2$Total, na.last=TRUE), ]
+df2
+x = rownames(df2)
+barplot(df2$Total,col='cornsilk',names.arg=x,xlab="Week days",ylab='Crime rates in Daejeon')
+# the most crimes are done on Friday
+
+
+
+# 2nd Research question:
+# In which time during a day in Daejeon, the most crimes are happened?
+
+Daejeon_Crime_Time = read.csv("Daejeon_Crime_Time.csv", header = T)
+Daejeon_Crime_Time
+df = Daejeon_Crime_Time[,2:7]
+clean = function(df){
+  as.numeric( gsub(",","",df) )
+}
+df = sapply(df, clean)
+df = as.data.frame(df)
+rownames(df) = Daejeon_Crime_Time[,1]
+df
+str(df)
+dim(df)
+colnames(df) = c("(00:00 - 04:00)","(04:00~07:00)","(07:00~12:00)","(12:00~18:00)","(18:00~20:00)","(20:00~24:00)")
+df
+df2 = as.matrix(df)
+class(df2)
+df2 = t(df2)
+df2
+df2 = as.data.frame(df2)
+df2
+str(df2)
+df2[,1]
+df2$Total = apply(df2, 1, sum)
+df2
+df2$City = as.factor(rep("Daejeon", 6))
+df2
+str(df2)
+df2 = df2[order(-df2$Total, na.last=TRUE), ]
+df2
+x = rownames(df2)
+barplot(df2$Total,col='cornsilk',names.arg=x,xlab="Week days",ylab='Crime rates in Daejeon')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+rf = randomForest(Costs~., data=df2, importance =T)
+
+print(rf)  # it is normal to have a different value because each computer has diferent random value 
+plot(rf, main="Random Forest Regression for Boston")
+
+length(rf$mse)
+min(rf$mse)
+mean(rf$mse)
+head(rf$mse)
+tail(rf$mse) 
+
+n <- which.min(rf$mse)  # give me the index which mse error is minimum
+n
+rf2 <- randomForest(Costs~., data=df2, 
+                    ntree=n, importance=TRUE, na.action=na.omit)  # now you can say the number of trees is the optimal one we found
+?randomForest
+print(rf2)
+# Importance of variables: higher value mean more important
+#  this importance will give you which feature is important in deciding this tree, the features at the top are important because bigger dimension/ which features come to the top ? (important) /   IncMSE: if you don't use this feature how much error will increase in your dataset / rm has the highest values, number of rooms is so important (most people use the once) / IncNodePurity (how much subtree really about that tree for example rm has the most sub trees and so important)
+importance(rf2)    
+varImpPlot(rf2, scale=T, main = "Variable Importance Plot")
+
+head(df2)
+par(mfrow=c(1,1))
+par(fig=c(0.1,0.7,0.3,0.9))
+par(cex=0.7, mai=c(0.1,0.1,0.2,0.1))
+quartz("decision tree", 10,10)
+dev.off()
+?quartz
+head(df2)
+library(rpart)
+rfit = rpart(Year~., data=df2, method="anova", control = rpart.control(minsplit=10))
+#rfit
+
+plot(rfit, uniform=T, main="reg" ,margin=0.2)
+text(rfit,   use.n=TRUE, all= T, cex=0.8) 
+
+library(bnlearn)
+#learning a beysian network from data
+bnhc <- hc(df2, score="bic-g")# based on gausian 
+#bnhc <- hc(marks, score="bic")# not work because it is for factor data
+bnhc
+bnhc$nodes
+bnhc$arcs
+
+library(igraph)
+edges=arcs(bnhc)
+nodes=nodes(bnhc)
+net <- graph.data.frame(edges,directed=T,vertices=nodes)
+plot(net,vertex.label=V(net)$name,vertex.size=40,
+     edge.arrow.size=0.3,vertex.color="cyan",
+     edge.color="black")
+
+
+library(PerformanceAnalytics) # look at how they are related, they are kind of related by with correlation you cannot find which one is the reason for the other one
+chart.Correlation(marks,pch=21,histogram=TRUE)
+
+str(storm2)
+
+colIndex=c( #which(colnames(storm2) == "LATITUDE"),
+  #which(colnames(storm2) == "LONGITUDE"),
+  which(colnames(storm2) == "CROPDMG"),
+  which(colnames(storm2) == "INJURIES"),
+  which(colnames(storm2) == "FATALITIES"),
+  #which(colnames(storm2) == "PROPDMG"),
+  #which(colnames(storm2) == "STATE"),
+  which(colnames(storm2) == "EVTYPE"))
+
+
+storm3 = storm2[1:10,colIndex]
+str(storm3)
+storm3
+# having continues and factor, we have to use different set of functions
+library(deal) # package for having combination factor and continues values
+str(storm3)
+storm3.nw <- network(storm3)          # specify prior network
+
+storm3.prior <- jointprior(storm3.nw) # make joint prior distribution
+# learn estimate parameters
+storm3.nw <- learn(storm3.nw,storm3,storm3.prior)$nw
+storm3.nw
+
+result <- heuristic(initnw=storm3.nw, data=storm3, prior=storm3.prior,
+                    restart=2, degree=10, trace=FALSE)
+win.graph(width=7,height=7)
+plot(getnetwork(result))
+
+
+
+
+?read.csv
