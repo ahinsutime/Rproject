@@ -1,11 +1,19 @@
-#dirname(rstudioapi::getSourceEditorContext()$path)
-#setwd("/Users/Amirsam/Documents/GitHub/")
-setwd("D:/Rdata")
+
+datapath <- dirname(rstudioapi::getSourceEditorContext()$path)
+datapath
+datapath <-gsub("/code", "", datapath)
+datapath
+datapath <- paste(datapath,"/dataset")
+datapath <- gsub(" ", "", datapath)
+datapath
+data2016 <- paste(datapath,"/2016")
+data2016 <- gsub(" ", "", data2016)
+data2016
+
+
+setwd()
 getwd()
 rm(list=ls())
-#rm(list=ls())
-
-
 
 
 ###########################################################
@@ -41,6 +49,30 @@ library(stats)
 library(graphics)
 library(lattice)
 library(ggplot2)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #
 #if(!file.exists("repdata-data-StormData.csv.bz2")) {
