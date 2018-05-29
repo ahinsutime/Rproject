@@ -1,7 +1,6 @@
 rm(list=ls())
 dev.off()
 
-setwd("C:/Rdata")
 
 #install.packages("githubinstall")
 #library(githubinstall)

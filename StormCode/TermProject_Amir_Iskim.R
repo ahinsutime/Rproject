@@ -11,7 +11,7 @@ data2016 <- gsub(" ", "", data2016)
 data2016
 
 
-setwd()
+setwd("c:/Rdata")
 getwd()
 rm(list=ls())
 
@@ -49,29 +49,6 @@ library(stats)
 library(graphics)
 library(lattice)
 library(ggplot2)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 #
@@ -295,7 +272,7 @@ injuries.event.ordered
 
 # Now the plot with fatalities and injuries per year
 
-# Figure 1. â€œWeather events most harmful and Fatalities/Injuries Trend, per year, USA, 1950 -2011â€
+# Figure 1. ?€œWeather events most harmful and Fatalities/Injuries Trend, per year, USA, 1950 -2011?€?
 
 ##par = c(mfrow = c(1,1), margin = c(50,2,2,1))
 par(mfrow = c(2, 2), mar = c(11.5, 5, 4, 2), las = 3, cex = 0.5, cex.main = 1.4, cex.lab = 1.2)

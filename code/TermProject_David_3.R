@@ -34,7 +34,7 @@ storm1 = storm
 #subset relevant columns
 #remove county data, remarks, refnum
 storm2 <- storm1[,-c(5:6,14:15,31,36:37)]
-#**(5)change "", "+","-","?" to NA----------------
+#**(5)change "","-","?" to NA & "+" to 1 ---------------------------
 storm2[ storm2 == "" ] <- NA
 storm3=storm2
 storm3[ storm3 == "+" ] <- "O"
@@ -100,38 +100,20 @@ storm6$CROPDMG_t <- ifelse(storm6$CROPDMGEXP == "T", 1e1*storm6$CROPDMG,
                                          ifelse(storm6$CROPDMGEXP == "M", 1e6*storm6$CROPDMG,
                                                 ifelse(storm6$CROPDMGEXP == "B", 1e9*storm6$CROPDMG,
                                                       ifelse(storm6$CROPDMGEXP == "O", 1*storm6$CROPDMG,0))))))
-
+storm6$DMG_t <- storm6$CROPDMG_t + storm6$PROPDMG_t
+View(storm6)
+storm7 <- storm6[,-c(21:24)]
+View(storm7)
 
 ###############################################################################################
-
-
 #Find correlation
-
 #t test
-
 #Linear regression
-
-
 #ANOVA
-
-
 #MANOVA
-
-
 #tree, random forest
-
-
 #Clustering
-
-
 #Association Rule
-
-
 #Visualization, geo locations (map)
-
-
-
-
-
 
 
