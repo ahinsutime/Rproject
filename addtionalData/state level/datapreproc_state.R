@@ -41,11 +41,15 @@ rgdpnumeric=gdpnumeric*deflator
 rgdp[,c(3:57)]=data.frame(rgdpnumeric)
 state=statecode$Abbreviation
 rgdp=cbind(state,rgdp)
+rgdp=rgdp[,-c(2,3)]
 
 # Population by State
 # data downloaded from https://fred.stlouisfed.org/search?nasw=0&st=population&t=annual%3Bpopulation%3Bstate%3Busa&ob=sr&od=desc
 pop=read.csv("popstate.csv",sep=",", header=TRUE)
 
-write.csv(pop,"state_pop.csv")
-write.csv(rgdp,"state_rgdp.csv")
-
+library(reshape2)
+rgdp=setNames(melt(rgdp), c('state', 'year', 'rgdp'))
+pop=setNames(melt(pop),c('state','year','pop'))
+statedata=merge(rgdp, pop, by=c("state", "year"))
+statedata$year <- substring(statedata$year, 2)
+write.csv(statedata,"statedate.csv")
