@@ -1,7 +1,8 @@
 rm(list=ls())
 dev.off()
-setwd("C:/Rdata")
-
+#setwd("C:/Rdata")
+setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+curdir=dirname(rstudioapi::getActiveDocumentContext()$path)
 #install.packages("githubinstall")
 #library(githubinstall)
 #githubinstall("https://github.com/awesomedata/awesome-public-datasets")
@@ -110,10 +111,15 @@ storm7$Begin.Time <- as.POSIXct(strptime(storm7$BGN_DATE, format ="%m/%d/%Y %H:%
 storm7$Year.Begin <- year(as.Date(storm7$Begin.Time))
 storm8 <- storm7[,-c(1:4,7:14,20,22,30)]
 View(storm8)
+
+
 #**(6)Merge with population data--------------------------------
+curdir=dirname(rstudioapi::getActiveDocumentContext()$path)
+projectdir=dirname(dirname(curdir))
+datadir=paste(projectdir, "/additionalData", sep="")
 #load new data
 ?read.csv
-addi_data<-read.csv("~/Rproject 2/addtionalData/state level/statedata.csv", sep = ",", header = T)
+addi_data<-read.csv(paste(datadir,"/state level/statedata.csv", sep=""), sep = ",", header = T)
 addi_data_2 <- addi_data[,-1]
 #change column names of both datas
 colnames(addi_data_2) <- c("STATE","YEAR","rgdp","pop")
@@ -123,9 +129,9 @@ colnames(storm8)[16] <- "YEAR"
 storm9<-merge(storm8, addi_data_2, by=c("STATE","YEAR"), all.x = T) 
 View(storm9)
 #add annual weather data
-annual_temp <- read.csv("~/Rproject 2/addtionalData/weather/annual_temp.csv", sep = ",", header = T)
+annual_temp <- read.csv(paste(datadir,"/weather/annual_temp.csv", sep=""), sep = ",", header = T)
 annual_temp_2 <- annual_temp[,-1]
-colnames(annual_temp_2) <- c("STATE","YEAR","tavg","tmax","tmin")
+colnames(annual_temp_2) <- c("STATE","YEAR","tavg","tmax","tmin","pcp")
 head(storm9)
 head(annual_temp_2)
 storm_f<-merge(storm9, annual_temp_2, by=c("STATE","YEAR"), all.x = T) 
