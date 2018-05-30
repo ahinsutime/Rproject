@@ -1,19 +1,20 @@
 
-datapath <- dirname(rstudioapi::getSourceEditorContext()$path)
-datapath
-datapath <-gsub("/code", "", datapath)
-datapath
-datapath <- paste(datapath,"/dataset")
-datapath <- gsub(" ", "", datapath)
-datapath
-data2016 <- paste(datapath,"/2016")
-data2016 <- gsub(" ", "", data2016)
-data2016
+# datapath <- dirname(rstudioapi::getSourceEditorContext()$path)
+# datapath
+# datapath <-gsub("/code", "", datapath)
+# datapath
+# datapath <- paste(datapath,"/dataset")
+# datapath <- gsub(" ", "", datapath)
+# datapath
+# data2016 <- paste(datapath,"/2016")
+# data2016 <- gsub(" ", "", data2016)
+# data2016
 
 
-setwd("c:/Rdata")
+setwd("/Users/Amirsam/Documents/GitHub/")
 getwd()
 rm(list=ls())
+#rm(list=ls())
 
 
 ###########################################################
@@ -272,7 +273,7 @@ injuries.event.ordered
 
 # Now the plot with fatalities and injuries per year
 
-# Figure 1. ?€œWeather events most harmful and Fatalities/Injuries Trend, per year, USA, 1950 -2011?€?
+# Figure 1. ???Weather events most harmful and Fatalities/Injuries Trend, per year, USA, 1950 -2011???
 
 ##par = c(mfrow = c(1,1), margin = c(50,2,2,1))
 par(mfrow = c(2, 2), mar = c(11.5, 5, 4, 2), las = 3, cex = 0.5, cex.main = 1.4, cex.lab = 1.2)
@@ -503,5 +504,9 @@ wf <- data.frame(Word=names(Freq), Freq=Freq)
 wordcloud(words=wf$Word, freq=wf$Freq, min.freq=3,
           random.order=FALSE, rot.per=0.35,
           colors=brewer.pal(8,"Dark2"))
+
+
+
+
 
 
