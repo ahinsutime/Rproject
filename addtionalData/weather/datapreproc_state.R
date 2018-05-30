@@ -16,6 +16,7 @@ annual_temp=merge(annual_temp, apcp, by=c("state", "year"))
 
 annual_temp=merge(statecode,annual_temp, by="state" )
 annual_temp=annual_temp[,-c(1)]
+colnames(annual_temp) = c("state","year","tavg","tmax","tmin","pcp")
 write.csv(annual_temp,"annual_temp.csv")
 
 
@@ -31,4 +32,5 @@ monthly_temp=merge(monthly_temp, mpcp, by=c("state", "year","month"))
 
 monthly_temp=merge(statecode,monthly_temp, by="state" )
 monthly_temp=monthly_temp[,-c(1)]
+colnames(monthly_temp) = c("state","year","month","tavg","tmax","tmin","pcp")
 write.csv(monthly_temp,"monthly_temp.csv")
