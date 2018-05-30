@@ -53,3 +53,14 @@ pop=setNames(melt(pop),c('state','year','pop'))
 statedata=merge(rgdp, pop, by=c("state", "year"))
 statedata$year <- substring(statedata$year, 2)
 write.csv(statedata,"statedata.csv")
+
+
+
+## Proportion of primary industry of total GDP
+primaryind=read.csv("primaryind.csv",sep=",", header=TRUE)
+library(reshape2)
+primind=setNames(melt(primaryind), c('state', 'year', 'primind'))
+primind$year <- substring(primind$year, 2)
+
+statedatawithpind=merge(statedata,primind,by=c("state","year"))
+write.csv(statedatawithpind,"statedata_short.csv")
