@@ -155,6 +155,13 @@ write.csv(
 
 ####Actual Code from Iskim
 
+
+curdir=dirname(rstudioapi::getActiveDocumentContext()$path)
+datadir <- paste(curdir, "/final code", sep="")
+setwd(datadir)
+storm_f = readRDS('storm_f.Rda')
+
+
 library(ggplot2)
 library(dplyr)
 library(readr)
