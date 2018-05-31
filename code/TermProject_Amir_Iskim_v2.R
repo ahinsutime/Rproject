@@ -147,7 +147,7 @@ rm(list=ls())
 #install & load
 #if you have already installed the packages only run line 12 and skip up to line 20
 #**--- Required packages -------------------
-packages <- c("R.utils", "data.table", "downloader", "lubridate", "plyr","dplyr","rstudioapi","randomForest","tree","party","rpart")
+packages <- c("R.utils", "data.table", "downloader", "lubridate", "plyr","dplyr","rstudioapi","randomForest","tree","party","rpart","grid","libcoin","partykit","igraph","PerformanceAnalytics","deal")
 ipak <- function(pkg){
   new.pkg <- pkg[!(pkg %in% installed.packages()[, "Package"])]
   if (length(new.pkg)) 
@@ -330,7 +330,7 @@ set.seed(123)
 storm <-transform(storm, F = as.numeric(F))
 storm <-transform(storm, YEAR = as.numeric(as.character(YEAR)))
 str(storm)
-storm1 = storm[,c(-1,-3,-11,-12)]
+storm1 = storm[,c(-1,-3,-4,-5,-6,-7,-11,-12)] # we removed factors, F is just for thornado and MAG is just for hail
 str(storm1)
 
 rf = randomForest(DMG_t~., data=storm1, importance =T,  na.action=na.omit)  
@@ -365,7 +365,7 @@ varImpPlot(rf2, scale=T, main = "Variable Importance Plot for estimating total d
 storm2 = storm
 storm2$MORBI_t = storm2$FATALITIES + storm2$INJURIES 
 str(storm2)
-storm2 = storm2[,c(-1,-3,-8,-13, -20)]
+storm2 = storm2[,c(-1,-3,-4,-5,-6,-7,-8,-13, -20)]
 str(storm2)
 # we removed DMG_t because it was the sum of crop damage (CROPDMG_t) and property damage (PROPDMG_t) to avoid repetitious features
 # We removed FATALITIES and INJURIES because MORBI_T is sum of them to extract real influencial factors 
@@ -409,14 +409,15 @@ str(storm)
 # distinguish what are the real variables influencing the prediction of total damage
 # we also remove factors to run random forest
 str(storm)
-storm3 = storm[,c(-1,-2,-6,-13)]
-View(storm3)
+storm3 = storm[,c(-1,-4,-5,-6,-7,-8,-13)]
+str(storm3)
+#View(storm3)
 table(factor(storm3$EVTYPE))
 storm3 <- na.omit(storm3) # omiting NA variables to make ctree function work
 levels(storm3$EVTYPE)
 storm3$EVTYPE <- factor(storm3$EVTYPE);
 table(factor(storm3$EVTYPE))
-crf = randomForest(EVTYPE~., data=storm3, importance = T, method = " class", proximity = T )
+crf = randomForest(EVTYPE~., data=storm3, ntree=5, importance = T, method = " class", proximity = T )
 
 # ct = ctree(EVTYPE~., data=storm3)
 # ct
@@ -426,41 +427,84 @@ crf = randomForest(EVTYPE~., data=storm3, importance = T, method = " class", pro
 
 
 
-
 ########## Recursive Partitioning (Decision trees) ######################
-
-
-rfit = rpart(DMG_t~., data=storm[,c(-2,-11,-12)], method="anova", control = rpart.control(minsplit=10))
-plot(rfit, uniform=T, main="reg", ,margin=0.2)
-text(rfit,   use.n=TRUE, all= T, cex=0.8)
-
-
 str(storm1)
-rfit = rpart(MORBI_t~., data=storm1[,c(-1,-2,-3,-13, -20,-8)], method="anova", control = rpart.control(minsplit=10))
+
+rfit = rpart(DMG_t~., data=storm1, method="anova", control = rpart.control(minsplit=10))
 plot(rfit, uniform=T, main="reg", ,margin=0.2)
 text(rfit,   use.n=TRUE, all= T, cex=0.8)
-levels(storm1$F)
-#rfit
 
 
+str(storm2)
+rfit = rpart(MORBI_t~., data=storm2, method="anova", control = rpart.control(minsplit=2))
+plot(rfit, uniform=T, main="reg", ,margin=0.2)
+text(rfit,   use.n=TRUE, all= T, cex=0.8)
 
-install.packages("bnlearn")
-library(bnlearn)
-#learning a beysian network from data
-bnhc <- hc(df2, score="bic-g")# based on gausian
-#bnhc <- hc(marks, score="bic")# not work because it is for factor data
+str(storm3)
+cfit = rpart(EVTYPE~., data=storm3, method = "class")
+plot(as.party(cfit), tp_args = list(id=FALSE))
+
+######### Beysian Analysis ########################
+
+#** DMG_t --------
+str(storm1)
+storm1 <- na.omit(storm1)
+#learning a beysian network from continues data
+bnhc <- hc(storm1, score="bic-g")# based on gausian 
 bnhc
 bnhc$nodes
 bnhc$arcs
-
-library(igraph)
+#library(igraph)
 edges=arcs(bnhc)
 nodes=nodes(bnhc)
 net <- graph.data.frame(edges,directed=T,vertices=nodes)
 plot(net,vertex.label=V(net)$name,vertex.size=40,
      edge.arrow.size=0.3,vertex.color="cyan",
      edge.color="black")
-
-
-library(PerformanceAnalytics) # look at how they are related, they are kind of related by with correlation you cannot find which one is the reason for the other one
+#library(PerformanceAnalytics) 
 chart.Correlation(marks,pch=21,histogram=TRUE)
+
+#** MORBI_t --------------
+str(storm2)
+storm2 <- na.omit(storm2)
+#learning a beysian network from continues data
+bnhc <- hc(storm2, score="bic-g")# based on gausian 
+bnhc
+bnhc$nodes
+bnhc$arcs
+#library(igraph)
+edges=arcs(bnhc)
+nodes=nodes(bnhc)
+net <- graph.data.frame(edges,directed=T,vertices=nodes)
+plot(net,vertex.label=V(net)$name,vertex.size=40,
+     edge.arrow.size=0.3,vertex.color="cyan",
+     edge.color="black")
+#library(PerformanceAnalytics) 
+chart.Correlation(marks,pch=21,histogram=TRUE)
+
+#** EVTY
+str(storm)
+dim(storm)
+storm4 = storm[,c(-4,-5,-6,-7,-8,-13,-17,-18)]
+str(storm4)
+levels(storm4$EVTYPE)
+levels(storm4$STATE)
+storm4 = na.omit(storm4)
+str(storm4)
+storm4$STATE <- factor(storm4$STATE)
+storm4$EVTYPE <- factor(storm4$EVTYPE)
+levels(storm4$EVTYPE)
+levels(storm4$STATE)
+
+
+storm4.nw <- network(storm4)          
+storm4.prior <- jointprior(storm4.nw) # make joint prior distribution
+# learn estimate parameters
+storm4.nw <- learn(storm4.nw,storm4,storm4.prior)$nw
+
+result <- heuristic(initnw=storm4.nw, data=storm4, prior=storm4.prior,
+                    restart=2, degree=10, trace=FALSE)
+#win.graph(width=7,height=7)
+plot(getnetwork(result))
+
+
