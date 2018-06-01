@@ -30,16 +30,6 @@ setwd(datadir)
 storm_f=readRDS('Ecomate.Rda')
 str(storm_f)
 
-#storm_f$INJURIES = storm8$INJURIES
-# saveRDS(storm_f,file = 'storm_f2.Rda')
-# write('storm_f.Rda')
-# ?write
-
-##########Rresearch Questions #######
-
-#** (1) Across the United States, which types of events (as indicated in the EVTYPE variable) are most harmful (most Fatalities and Injuries)? --------
-#  we can answer this question by sorting fatalities and injuries in decreasing manner for each type of event
-#** Answer: TORNADO caused most number of fatalities, WIND caused most number of INJURIES and TOTAL (FATALITIES+INJURIES) 
 
 #--------- preprosesing data for our purpose
 str(storm_f)
@@ -47,6 +37,20 @@ storm <- storm_f[,-c(4, 9, 10)]
 storm$MORBI_t = storm$FATALITIES + storm$INJURIES 
 storm <-transform(storm, YEAR = as.numeric(as.character(YEAR)))
 str(storm)
+
+
+#storm_f$INJURIES = storm8$INJURIES
+# saveRDS(storm_f,file = 'storm_f2.Rda')
+# write('storm_f.Rda')
+# ?write
+
+##########Research Questions #######
+
+#** (1) Across the United States, which types of events (as indicated in the EVTYPE variable) are most harmful (most Fatalities and Injuries)? --------
+#  we can answer this question by sorting fatalities and injuries in decreasing manner for each type of event
+#** Answer: TORNADO caused most number of fatalities, WIND caused most number of INJURIES and TOTAL (FATALITIES+INJURIES) 
+
+
 #**  Estimating total fatalities and injuries per event type ----
 
 # Aggregate Fatalities by event type
@@ -167,9 +171,8 @@ set.seed(123)
 # distinguish what are the real variables influencing the prediction of total damage
 # we also remove factors to run random forest
 str(storm)
-
-storm1 = storm[,-c(3, 8, 9)] # We removed EVTYPE, PROPDMG_t, CROPDMG_t
-
+storm1 = storm[,-c(1, 3, 4, 5, 8, 9, 14, 15)] # We removed EVTYPE, PROPDMG_t, CROPDMG_t
+str(storm1)
 
 rf = randomForest(DMG_t~., data=storm1, importance =T,  na.action=na.omit)  
 print(rf)  
