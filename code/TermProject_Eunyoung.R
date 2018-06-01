@@ -1,70 +1,207 @@
-rm(list=ls())
-dev.off()
+# I tried to make every possible and interesting data visualization in this file.
 
-setwd("C:/Rdata")
+setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+rm(list = ls())
 
-#install.packages("githubinstall")
-#library(githubinstall)
-#githubinstall("https://github.com/awesomedata/awesome-public-datasets")
+# import Ecomate.Rda
+curdir=dirname(rstudioapi::getActiveDocumentContext()$path)
+stormdatapath=file.path(curdir,"final code", "Ecomate.Rda")
+storm=readRDS(stormdatapath)
+
+# we need state names, not just code, to use map feature 
+statecodeweb=url(paste("http://eunyoungko.com/resources/rprojectdata/economic/","statecode.csv", sep=""))
+statecode <- read.csv(statecodeweb,sep=",", header=TRUE)
+colnames(statecode)<-c("STATENAME","STATE")
+storm_v=merge(storm,statecode, by="STATE", all.x=TRUE)
+  
+# I added packages "fiftystater", "googleVis","wkhtmltopdf" and "plotly" in the below list 
+packages <- c("fiftystater","plotly","googleVis","wkhtmltopdf","R.utils", "data.table", "downloader", "lubridate", "plyr","dplyr","rstudioapi","randomForest","tree","party","rpart","grid","libcoin","partykit","igraph","PerformanceAnalytics","deal", "bnlearn")
+ipak <- function(pkg){
+  new.pkg <- pkg[!(pkg %in% installed.packages()[, "Package"])]
+  if (length(new.pkg)) 
+    install.packages(new.pkg, dependencies = TRUE)
+  sapply(pkg, require, character.only = TRUE)
+}
+ipak(packages)
+lapply(packages, require,character.only=T)
 
 
-###############################################################################################
+
+#**Plot maps for basic variables----------------
+
+#***Raw variables for each states, for the whole period----------
+
 library(data.table)
+library(dplyr)
 
-#fread is much much much faster than read. Let's use fread to read csv datasets
+# total event count
+eventcount=storm_v[, .N, by = .(STATENAME, EVTYPE)] %>% dcast(STATENAME ~ EVTYPE)
+toteventcount=rowSums(eventcount[,2:20], na.rm=TRUE)
+eventcount[,"totalevcount"]<-toteventcount
+TotalEvent <- gvisGeoChart(eventcount, "STATENAME", "totalevcount",
+                          options=list(region="US", 
+                                       displayMode="regions", 
+                                       resolution="provinces",
+                                       width=600, height=400))
+g=plot(TotalEvent)
+print(TotalEvent,file="mapPlots/totalevent.html")
+#system("wkhtmltoimage --enable-plugins --javascript-delay 10000   totalevent.html totalevent.png")
 
-#Datasets of crime
+# flood count by states 
+TotalFlood <- gvisGeoChart(eventcount, "STATENAME", "FLOOD",
+                           options=list(region="US", 
+                                        displayMode="regions", 
+                                        resolution="provinces",
+                                        width=600, height=400))
+print(TotalFlood,file="mapPlots/totalflood.html")
 
-globalTerrorism <- fread.csv('globalterrorismdb_0617dist.csv', stringsAsFactors=TRUE)
-gunViolence <- fread.csv('gun-violence-data_01-2013_03-2018.csv', stringsAsFactors=TRUE)
-#globalTerrorism <- read.csv('globalterrorismdb_0617dist.csv', header=TRUE)
-#gunViolence <- read.csv('gun-violence-data_01-2013_03-2018.csv', header=TRUE)
+# storm count by states 
+TotalStorm <- gvisGeoChart(eventcount, "STATENAME", "STORM",
+                           options=list(region="US", 
+                                        displayMode="regions", 
+                                        resolution="provinces",
+                                        width=600, height=400))
+print(TotalStorm,file="mapPlots/totalstorm.html")
 
-#Datasets of climate
+# wind count by states 
+TotalWind <- gvisGeoChart(eventcount, "STATENAME", "WIND",
+                           options=list(region="US", 
+                                        displayMode="regions", 
+                                        resolution="provinces",
+                                        width=600, height=400))
+print(TotalWind,file="mapPlots/totalwind.html")
 
-AirPollution <- fread.csv('Facility Air Pollution Dataset - All Facilities.csv', stringsAsFactors=TRUE)
-GlobalTemperature <- fread.csv('GlobalTemperatures.csv', stringsAsFactors=TRUE)
-GlobalLandTemp_State <- fread.csv('GlobalLandTemperaturesByState.csv', stringsAsFactors=TRUE)
-GlobalLandTemp_MajorCity <- fread.csv('GlobalLandTemperaturesByMajorCity.csv', stringsAsFactors=TRUE)
-GlobalLandTemp_Country <- fread.csv('GlobalLandTemperaturesByCountry.csv', stringsAsFactors=TRUE)
-GlobalLandTemp_City <- fread("GlobalLandTemperaturesByCity.csv", stringsAsFactors=TRUE)
-#AirPollution <- read.csv('Facility Air Pollution Dataset - All Facilities.csv', header=TRUE)
-#GlobalTemperature <- read.csv('GlobalTemperatures.csv', header=TRUE)
-#GlobalLandTemp_State <- read.csv('GlobalLandTemperaturesByState.csv', header=TRUE)
-#GlobalLandTemp_MajorCity <- read.csv('GlobalLandTemperaturesByMajorCity.csv', header=TRUE)
-#GlobalLandTemp_Country <- read.csv('GlobalLandTemperaturesByCountry.csv', header=TRUE)
-#GlobalLandTemp_City <- read.csv('GlobalLandTemperaturesByCity.csv', header=TRUE)
+# rgdp, population, rgdp per capita by states, at 1993 and 2011 (start year and end year)
+urlecondata <- "http://eunyoungko.com/resources/rprojectdata/economic/"
+statedataweb=url(paste(urlecondata,"statedata.csv", sep=""))
+statedata <- read.csv(statedataweb,sep=",", header=TRUE)
+statedata=statedata[,-c(1)]
+colnames(statedata) <-c("STATE","YEAR","rgdp",'pop')
+statedata_v=merge(statedata,statecode, by="STATE", all.x=TRUE)
+rgdppc=statedata$rgdp/statedata$pop
+statedata_v[,"rgdppc"]<-rgdppc
 
-###############################################################################################
+statedata_v_2011=subset(statedata_v, YEAR==2011)
+statedata_v_1963=subset(statedata_v, YEAR==1963)
 
+# rgdp
+Rgdp63 <- gvisGeoChart(statedata_v_1963, "STATENAME", "rgdp",
+                          options=list(region="US", 
+                                       displayMode="regions", 
+                                       resolution="provinces",
+                                       width=600, height=400))
+print(Rgdp63,file="mapPlots/rgdp63.html")
 
-#Find correlation
+Rgdp11 <- gvisGeoChart(statedata_v_2011, "STATENAME", "rgdp",
+                       options=list(region="US", 
+                                    displayMode="regions", 
+                                    resolution="provinces",
+                                    width=600, height=400))
+print(Rgdp11,file="mapPlots/rgdp11.html")
 
-#t test
+# pop
+Pop63 <- gvisGeoChart(statedata_v_1963, "STATENAME", "pop",
+                       options=list(region="US", 
+                                    displayMode="regions", 
+                                    resolution="provinces",
+                                    width=600, height=400))
+print(Pop63,file="mapPlots/pop63.html")
 
-#Linear regression
+Pop11 <- gvisGeoChart(statedata_v_2011, "STATENAME", "pop",
+                       options=list(region="US", 
+                                    displayMode="regions", 
+                                    resolution="provinces",
+                                    width=600, height=400))
+print(Pop11,file="mapPlots/pop11.html")
 
+# rgdp per capita
+Rgdppc63 <- gvisGeoChart(statedata_v_1963, "STATENAME", "rgdppc",
+                      options=list(region="US", 
+                                   displayMode="regions", 
+                                   resolution="provinces",
+                                   width=600, height=400))
+print(Rgdppc63,file="mapPlots/rgdppc63.html")
 
-#ANOVA
+Rgdppc11 <- gvisGeoChart(statedata_v_2011, "STATENAME", "rgdppc",
+                      options=list(region="US", 
+                                   displayMode="regions", 
+                                   resolution="provinces",
+                                   width=600, height=400))
+print(Rgdppc11,file="mapPlots/rgdppc11.html")
 
+# weather data
+urlweatherdata <- "http://eunyoungko.com/resources/rprojectdata/weather/"
+tempweb=url(paste(urlweatherdata,"annual_temp.csv", sep=""))
+tempdata <- read.csv(tempweb,sep=",", header=TRUE)
+tempdata=tempdata[,-c(1)]
+colnames(tempdata) <-c("STATENAME","YEAR","tavg",'tmax','tmin','pcp')
 
-#MANOVA
+tempdata_v_2011=subset(tempdata, YEAR==2011)
+tempdata_v_1963=subset(tempdata, YEAR==1963)
 
+# tavg
+tavg63 <- gvisGeoChart(tempdata_v_1963, "STATENAME", "tavg",
+                         options=list(region="US", 
+                                      displayMode="regions", 
+                                      resolution="provinces",
+                                      width=600, height=400))
+print(tavg63,file="mapPlots/tavg63.html")
 
-#tree, random forest
+tavg11 <- gvisGeoChart(tempdata_v_2011, "STATENAME", "tavg",
+                       options=list(region="US", 
+                                    displayMode="regions", 
+                                    resolution="provinces",
+                                    width=600, height=400))
+print(tavg11,file="mapPlots/tavg11.html")
 
+# tmax
+tmax63 <- gvisGeoChart(tempdata_v_1963, "STATENAME", "tmax",
+                       options=list(region="US", 
+                                    displayMode="regions", 
+                                    resolution="provinces",
+                                    width=600, height=400))
+print(tmax63,file="mapPlots/tmax63.html")
 
-#Clustering
+tmax11 <- gvisGeoChart(tempdata_v_2011, "STATENAME", "tmax",
+                       options=list(region="US", 
+                                    displayMode="regions", 
+                                    resolution="provinces",
+                                    width=600, height=400))
+print(tmax11,file="mapPlots/tmax11.html")
 
+# tmin
+tmin63 <- gvisGeoChart(tempdata_v_1963, "STATENAME", "tmin",
+                       options=list(region="US", 
+                                    displayMode="regions", 
+                                    resolution="provinces",
+                                    width=600, height=400))
+print(tmin63,file="mapPlots/tmin63.html")
 
-#Association Rule
+tmin11 <- gvisGeoChart(tempdata_v_2011, "STATENAME", "tmin",
+                       options=list(region="US", 
+                                    displayMode="regions", 
+                                    resolution="provinces",
+                                    width=600, height=400))
+print(tmin11,file="mapPlots/tmin11.html")
 
+# precipitation
+pcp63 <- gvisGeoChart(tempdata_v_1963, "STATENAME", "pcp",
+                       options=list(region="US", 
+                                    displayMode="regions", 
+                                    resolution="provinces",
+                                    width=600, height=400))
+print(pcp63,file="mapPlots/pcp63.html")
 
-#Visualization, geo locations (map)
+pcp11 <- gvisGeoChart(tempdata_v_2011, "STATENAME", "pcp",
+                       options=list(region="US", 
+                                    displayMode="regions", 
+                                    resolution="provinces",
+                                    width=600, height=400))
+print(pcp11,file="mapPlots/pcp11.html")
 
-
-
-
-
-
+#*** Detailed manage for disasters----------
+# flood, wind, storm 
+flood=subset(storm_v,EVTYPE=="FLOOD")
+wind=subset(storm_v,EVTYPE=="WIND")
+storm=subset(storm_v,EVTYPE=="STORM")
 
