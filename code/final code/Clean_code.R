@@ -209,6 +209,8 @@ str(final_storm)
 dim(final_storm)
 x<-na.exclude(final_storm)
 dim(x)
+saveRDS(x,file = 'Ecomate.Rda')
+getwd()
 ###############################################################################################
 #3.Basic statistic analysis##########
 #**(1)summary table of numeric variables--------
