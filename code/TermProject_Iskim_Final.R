@@ -41,8 +41,9 @@ str(storm_f)
 #** Answer: TORNADO caused most number of fatalities, WIND caused most number of INJURIES and TOTAL (FATALITIES+INJURIES) 
 
 #--------- preprosesing data for our purpose
-
-storm <- storm_f[,-c(9, 10)]
+str(storm_f)
+storm <- storm_f[,-c(4, 9, 10)]
+storm <-transform(storm, YEAR = as.numeric(as.character(YEAR)))
 str(storm)
 #**  Estimating total fatalities and injuries per event type ----
 
@@ -170,23 +171,15 @@ set.seed(123)
 # distinguish what are the real variables influencing the prediction of total damage
 # we also remove factors to run random forest
 str(storm)
-storm <-transform(storm, F = as.numeric(F))
-storm <-transform(storm, YEAR = as.numeric(as.character(YEAR)))
-str(storm)
-storm1 = storm[,c(-2,-3)] # we removed factors, F is just for thornado and MAG is just for hail
-str(storm1)
+
+storm1 = storm[,-c(3, 8, 9)] # We removed EVTYPE, PROPDMG_t, CROPDMG_t
+
 
 rf = randomForest(DMG_t~., data=storm1, importance =T,  na.action=na.omit)  
 print(rf)  
 par(mfrow = c(1, 1), mar = c(11.5, 5, 4, 2), las = 3, cex = 0.5, cex.main = 1.4, cex.lab = 1.2)
 
 plot(rf, main="Random Forest Regression for ecomate (economic + climate + natural events) for estimating total damage (crop + property damage)")
-
-# length(rf$mse)
-# min(rf$mse)
-# mean(rf$mse)
-# head(rf$mse)
-# tail(rf$mse) 
 
 #--- optimal number of trees
 n <- which.min(rf$mse); n   # give me the index which mse error of random forest is minimum
@@ -208,7 +201,8 @@ varImpPlot(rf2, scale=T, main = "Variable Importance Plot for estimating total d
 storm2 = storm
 storm2$MORBI_t = storm2$FATALITIES + storm2$INJURIES 
 str(storm2)
-storm2 = storm2[,c(-1,-3,-4,-5,-6,-7,-8,-13, -20)]
+
+storm2 <-  storm[,-c(3, 4, 5, 10)]
 str(storm2)
 # we removed DMG_t because it was the sum of crop damage (CROPDMG_t) and property damage (PROPDMG_t) to avoid repetitious features
 # We removed FATALITIES and INJURIES because MORBI_T is sum of them to extract real influencial factors 
@@ -244,30 +238,6 @@ View(storm)
 #   which makes sense, like our previous interpretation of result again LONGITUDE is influencial (place of living is important), 
 #   population is important (more population leads to more morbi and Fujita(Thurnado power) are among most influencial features)
 #   but in this case, morbi is not influenced by economical condition (rgdp), even if you are rich, if the natural even is strong, you will die!! :D
-
-str(storm)
-
-#** Random forest for estimating event type (EVTYPE) ------------
-# we removed crop damage (CROPDMG_t) and property damage (PROPDMG_t) because DMG_t is the sum of these two variables, and it is better to be removed to 
-# distinguish what are the real variables influencing the prediction of total damage
-# we also remove factors to run random forest
-str(storm)
-storm3 = storm[,c(-1,-4,-5,-6,-7,-8,-13)]
-str(storm3)
-#View(storm3)
-table(factor(storm3$EVTYPE))
-storm3 <- na.omit(storm3) # omiting NA variables to make ctree function work
-levels(storm3$EVTYPE)
-storm3$EVTYPE <- factor(storm3$EVTYPE);
-table(factor(storm3$EVTYPE))
-crf = randomForest(EVTYPE~., data=storm3, ntree=5, importance = T, method = " class", proximity = T )
-
-# ct = ctree(EVTYPE~., data=storm3)
-# ct
-# plot(ct, type='simple')
-# print(rf)  
-# par(mfrow = c(1, 1), mar = c(11.5, 5, 4, 2), las = 3, cex = 0.5, cex.main = 1.4, cex.lab = 1.2)
-
 
 
 ########## Recursive Partitioning (Decision trees) ######################
