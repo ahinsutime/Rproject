@@ -1,0 +1,315 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>GeoChartID588b5e7f74aa</title>
+<meta http-equiv="content-type" content="text/html;charset=utf-8" />
+<style type="text/css">
+body {
+  color: #444444;
+  font-family: Arial,Helvetica,sans-serif;
+  font-size: 75%;
+  }
+  a {
+  color: #4D87C7;
+  text-decoration: none;
+}
+</style>
+</head>
+<body>
+ <!-- GeoChart generated in R 3.4.3 by googleVis 0.6.2 package -->
+<!-- Sat Jun  2 05:39:14 2018 -->
+
+
+<!-- jsHeader -->
+<script type="text/javascript">
+ 
+// jsData 
+function gvisDataGeoChartID588b5e7f74aa () {
+var data = new google.visualization.DataTable();
+var datajson =
+[
+ [
+"ALASKA",
+62.14757834
+],
+[
+"ALABAMA",
+28.1447764
+],
+[
+"ARKANSAS",
+29.64629884
+],
+[
+"ARIZONA",
+31.04750245
+],
+[
+"CALIFORNIA",
+44.58806917
+],
+[
+"COLORADO",
+43.31900566
+],
+[
+"CONNECTICUT",
+56.48682596
+],
+[
+"DELAWARE",
+59.1263821
+],
+[
+"FLORIDA",
+35.89358098
+],
+[
+"GEORGIA",
+41.10746161
+],
+[
+"HAWAII",
+50.15734305
+],
+[
+"IOWA",
+51.15368528
+],
+[
+"IDAHO",
+35.26345087
+],
+[
+"ILLINOIS",
+52.85027605
+],
+[
+"INDIANA",
+46.16391042
+],
+[
+"KANSAS",
+50.97625791
+],
+[
+"KENTUCKY",
+42.70476691
+],
+[
+"LOUISIANA",
+56.13679236
+],
+[
+"MASSACHUSETTS",
+8.863295074
+],
+[
+"MARYLAND",
+62.49174654
+],
+[
+"MAINE",
+42.67685884
+],
+[
+"MICHIGAN",
+5.752896181
+],
+[
+"MINNESOTA",
+7.632946021
+],
+[
+"MISSOURI",
+6.547202443
+],
+[
+"MISSISSIPPI",
+4.8477793
+],
+[
+"MONTANA",
+6.59063908
+],
+[
+"NORTH CAROLINA",
+10.9309486
+],
+[
+"NORTH DAKOTA",
+16.06822295
+],
+[
+"NEBRASKA",
+9.128814635
+],
+[
+"NEW HAMPSHIRE",
+9.185660085
+],
+[
+"NEW JERSEY",
+10.69666818
+],
+[
+"NEW MEXICO",
+8.747533935
+],
+[
+"NEVADA",
+8.151644965
+],
+[
+"NEW YORK",
+14.24118336
+],
+[
+"OHIO",
+12.72723769
+],
+[
+"OKLAHOMA",
+12.95102602
+],
+[
+"OREGON",
+17.21279339
+],
+[
+"PENNSYLVANIA",
+18.25173264
+],
+[
+"RHODE ISLAND",
+19.7030352
+],
+[
+"SOUTH CAROLINA",
+16.11869855
+],
+[
+"SOUTH DAKOTA",
+23.44075969
+],
+[
+"TENNESSEE",
+19.60179884
+],
+[
+"TEXAS",
+25.86745958
+],
+[
+"UTAH",
+22.14430426
+],
+[
+"VIRGINIA",
+28.70837325
+],
+[
+"VERMONT",
+23.02980041
+],
+[
+"WASHINGTON",
+30.85914554
+],
+[
+"WISCONSIN",
+28.72990036
+],
+[
+"WEST VIRGINIA",
+22.91782864
+],
+[
+"WYOMING",
+47.04743256
+] 
+];
+data.addColumn('string','STATENAME');
+data.addColumn('number','rgdppc');
+data.addRows(datajson);
+return(data);
+}
+ 
+// jsDrawChart
+function drawChartGeoChartID588b5e7f74aa() {
+var data = gvisDataGeoChartID588b5e7f74aa();
+var options = {};
+options["width"] = 600;
+options["height"] = 400;
+options["region"] = "US";
+options["displayMode"] = "regions";
+options["resolution"] = "provinces";
+
+
+    var chart = new google.visualization.GeoChart(
+    document.getElementById('GeoChartID588b5e7f74aa')
+    );
+    chart.draw(data,options);
+    
+
+}
+  
+ 
+// jsDisplayChart
+(function() {
+var pkgs = window.__gvisPackages = window.__gvisPackages || [];
+var callbacks = window.__gvisCallbacks = window.__gvisCallbacks || [];
+var chartid = "geochart";
+  
+// Manually see if chartid is in pkgs (not all browsers support Array.indexOf)
+var i, newPackage = true;
+for (i = 0; newPackage && i < pkgs.length; i++) {
+if (pkgs[i] === chartid)
+newPackage = false;
+}
+if (newPackage)
+  pkgs.push(chartid);
+  
+// Add the drawChart function to the global list of callbacks
+callbacks.push(drawChartGeoChartID588b5e7f74aa);
+})();
+function displayChartGeoChartID588b5e7f74aa() {
+  var pkgs = window.__gvisPackages = window.__gvisPackages || [];
+  var callbacks = window.__gvisCallbacks = window.__gvisCallbacks || [];
+  window.clearTimeout(window.__gvisLoad);
+  // The timeout is set to 100 because otherwise the container div we are
+  // targeting might not be part of the document yet
+  window.__gvisLoad = setTimeout(function() {
+  var pkgCount = pkgs.length;
+  google.load("visualization", "1", { packages:pkgs, callback: function() {
+  if (pkgCount != pkgs.length) {
+  // Race condition where another setTimeout call snuck in after us; if
+  // that call added a package, we must not shift its callback
+  return;
+}
+while (callbacks.length > 0)
+callbacks.shift()();
+} });
+}, 100);
+}
+ 
+// jsFooter
+</script>
+ 
+<!-- jsChart -->  
+<script type="text/javascript" src="https://www.google.com/jsapi?callback=displayChartGeoChartID588b5e7f74aa"></script>
+ 
+<!-- divChart -->
+  
+<div id="GeoChartID588b5e7f74aa" 
+  style="width: 600; height: 400;">
+</div>
+ <div><span>Data: statedata_v_2011 &#8226; Chart ID: <a href="Chart_GeoChartID588b5e7f74aa.html">GeoChartID588b5e7f74aa</a> &#8226; <a href="https://github.com/mages/googleVis">googleVis-0.6.2</a></span><br /> 
+<!-- htmlFooter -->
+<span> 
+  R version 3.4.3 (2017-11-30) 
+  &#8226; <a href="https://developers.google.com/terms/">Google Terms of Use</a> &#8226; <a href="https://google-developers.appspot.com/chart/interactive/docs/gallery/geochart">Documentation and Data Policy</a>
+</span></div>
+</body>
+</html>
