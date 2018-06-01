@@ -5,7 +5,6 @@ setwd("C:/Rdata")
 #install.packages("githubinstall")
 #library(githubinstall)
 #githubinstall("https://github.com/awesomedata/awesome-public-datasets")
-
 ############1.Preparing data###################
 #**(1)Install and load packages----------------
 #install & load
@@ -29,7 +28,10 @@ bz2.data <- "repdata_data_StormData.csv.bz2"
 download(url, bz2.data, mode = "wb")  
 bunzip2(bz2.data, "repdata-data-StormData.csv", overwrite=TRUE, remove = FALSE)
 storm <- fread("repdata-data-StormData.csv", sep = ",", header = TRUE)
-storm1 = storm
+storm1<-storm[!storm$STATE %in% c("AS","DC","FM","GU","MH","MP",
+                          "PW","PR","VI","AE","AA","AP", "AM", "AN",
+                          "GM","LC","LE","LH","LM","LO","LS","PH","PK",
+                          "PM","PZ","SL","ST","XX"), ]
 #**(3)Process data----------------
 #subset relevant columns
 #remove county data, remarks, refnum
@@ -173,6 +175,7 @@ urlweatherdata <- "http://eunyoungko.com/resources/rprojectdata/weather/"
 statecodeweb=url(paste(urlecondata,"statecode.csv", sep=""))
 statecode <- read.csv(statecodeweb,sep=",", header=TRUE)
 head(statecode)
+levels(statecode$Abbreviation)
 colnames(statecode)[1]<-"state"
 # annual data
 atavg<-read.csv(url(paste(urlweatherdata,"annual_tavg.csv", sep="")), sep=",", header=TRUE)
@@ -188,14 +191,11 @@ annual_temp = annual_temp_f[,-1]
 colnames(annual_temp) = c("state","year","tavg","tmax","tmin","pcp")
 annual_temp_2 <- annual_temp
 colnames(annual_temp_2) <- c("STATE","YEAR","tavg","tmax","tmin","pcp")
-str(annual_temp_2)
 annual_temp_2$YEAR<-as.numeric(annual_temp_2$YEAR)
 annual_temp_2$STATE<-as.character(annual_temp_2$STATE)
 storm_f<-merge(storm9, annual_temp_2, by=c("STATE","YEAR"), all.x = T) 
 na_count_an <-sapply(storm9, function(y) sum(length(which(is.na(y)))))
 na_count_an
-na_count_final <-sapply(storm_f, function(y) sum(length(which(is.na(y)))))
-na_count_final
 #change data structure
 storm_f$STATE<-as.factor(storm_f$STATE)
 storm_f$YEAR<-as.factor(storm_f$YEAR)
@@ -212,8 +212,11 @@ dim(x)
 ###############################################################################################
 #3.Basic statistic analysis##########
 #**(1)summary table of numeric variables--------
-
-
+str(x)
+str(statecode)
+unique(x$STATE)
+levels(x$STATE)
+setdiff(final_storm$STATE, statecode$Abbreviation)
 #**(2)Frequency table of factor variables--------
 
 #**(3)Linear regression----------
