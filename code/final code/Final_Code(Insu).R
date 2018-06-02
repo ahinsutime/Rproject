@@ -741,31 +741,53 @@ crf = randomForest(EVTYPE~., data=storm3_s, importance = T, method = " class", p
 print(crf)
 predict(crf, type='prob')
 
-#plot(crf)
+plot(crf)
 
 
+err<-crf$err.rate
+names(err[1,])
+library(reshape2)
+library(ggplot2)
+
+str(err[1,])
+test <- data.frame(hmm=err, trees=as.numeric(rep(1:500)))
 
 
-x<-rep(list(1:length(crf$err.rate[,1])),length(crf$err.rate[1,]))
-y<-crf$err.rate
-#head(y)
-str(y)
-str(x)
-#head(x, 501)
-rfd<-data.frame(y)
-str(y[,1])
-ggplot(rfd, aes(x=y[,1], y))+
-  #geom_point(col='blue')+
-  geom_line(col='blue')+
-  #stat_smooth(method='lm', col='red')+
-  theme_bw()+
+#test_data_long <- melt(test, id="trees")  # convert to long format
+#str(test_data_long)
+str(test)
+library(RColorBrewer)
+cols <- as.factor(names(err[1,]))
+
+
+wtf <- as.factor(err)
+ggplot(data=test,aes(x=trees)) +
+  geom_line(aes(y=hmm.OOB, colour=cols[1]))+
+  geom_line(aes(y=hmm.COLD, colour=cols[2]))+
+  geom_line(aes(y=hmm.DRY, colour=cols[3]))+
+  geom_line(aes(y=hmm.FIRE, colour=cols[4]))+
+  geom_line(aes(y=hmm.FLOOD, colour=cols[5]))+
+  geom_line(aes(y=hmm.FOG, colour=cols[6]))+
+  geom_line(aes(y=hmm.FUNNEL.CLOUD, colour=cols[7]))+
+  geom_line(aes(y=hmm.HEAT, colour=cols[8]))+
+  geom_line(aes(y=hmm.ICE, colour=cols[9]))+
+  geom_line(aes(y=hmm.LANDSLIDE, colour=cols[10]))+
+  geom_line(aes(y=hmm.SNOW, colour=cols[11]))+
+  geom_line(aes(y=hmm.STORM, colour=cols[12]))+
+  geom_line(aes(y=hmm.SURF, colour=cols[13]))+
+  geom_line(aes(y=hmm.TORNADO, colour=cols[14]))+
+  geom_line(aes(y=hmm.WIND, colour=cols[15]))+
+  scale_colour_manual(name="Event Types",values=cols)+
   xlab('Number of trees')+
   ylab('Error (MSE)')+
-  ggtitle("Random Forest Regression for Ecomate (Economy+Climate+Natural Events) for estimating Morbimortalities")+
-  theme(plot.title = element_text(hjust = 0.5))
+  ggtitle("Random Forest Regression for Ecomate (Economy+Climate+Natural Events) for estimating Event Types")+
+  theme(plot.title = element_text(hjust = 0.5))+
+  # scale_color_manual(labels = c("T999", "T888"), values = c("blue", "red")) +
+  theme_bw() 
 
-
-
+# theme(axis.text.x=element_text(size=14), axis.title.x=element_text(size=16),
+#       axis.text.y=element_text(size=14), axis.title.y=element_text(size=16),
+#       plot.title=element_text(size=20, face="bold", color="darkgreen"))
 
 
 
