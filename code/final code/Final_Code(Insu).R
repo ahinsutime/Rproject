@@ -563,27 +563,27 @@ ggplot(Fats, aes(x=State, y=Fatalities, fill=State))+
 
 
 
-Injy<-injuries.year.sorted[1:nr,]
-Injy$Year <- factor(Injy$Year, levels = Injy$Year[order(-Injy$Injuries)])
+Injs<-injuries.state.sorted[1:nr,]
+Injs$State <- factor(Injs$State, levels = Injs$State[order(-Injy$Injuries)])
 
-ggplot(Injy, aes(x=Year, y=Injuries, fill=Year))+
+ggplot(Injs, aes(x=State, y=Injuries, fill=State))+
   geom_bar(stat="identity", position="dodge")+
-  xlab("Year")+
+  xlab("State")+
   ylab("Injuries")+
-  ggtitle("Injuries vs Year")+
+  ggtitle("Injuries vs State")+
   theme_bw()+
   theme(axis.text.x = element_text(angle = 90, hjust = 1))+
   theme(plot.title = element_text(hjust = 0.5))
 
 
-Mory<-morbimortality.year.sorted[1:nr,]
-Mory$Year <- factor(Mory$Year, levels = Mory$Year[order(-Mory$Total)])
+Mors<-morbimortality.state.sorted[1:nr,]
+Mors$State <- factor(Mors$State, levels = Mors$State[order(-Mory$Total)])
 
-ggplot(Mory, aes(x=Year, y=Total, fill=Year))+
+ggplot(Mors, aes(x=State, y=Total, fill=State))+
   geom_bar(stat="identity", position="dodge")+
-  xlab("Year")+
+  xlab("State")+
   ylab("Morbimortalities")+
-  ggtitle("Morbimortalities vs Year")+
+  ggtitle("Morbimortalities vs State")+
   theme_bw()+
   theme(axis.text.x = element_text(angle = 90, hjust = 1))+
   theme(plot.title = element_text(hjust = 0.5))
