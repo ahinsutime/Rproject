@@ -18,7 +18,9 @@ packages <- c("R.utils", "data.table", "downloader", "lubridate", "plyr","dplyr"
               "rstudioapi","randomForest","tree","party","tidyr","broom","datasets",
               "ggplot2","tabplot","PerformanceAnalytics","coefplot","RColorBrewer",
               "data.table","igraph", "rpart","network","bnlearn","lattice","party", 
-              "grid","partykit","deal")
+              "grid","partykit","deal","fiftystater","plotly","googleVis")
+
+
 ipak <- function(pkg){
   new.pkg <- pkg[!(pkg %in% installed.packages()[, "Package"])]
   if (length(new.pkg)) 
@@ -344,11 +346,15 @@ storm=readRDS('Cleandata.Rda')
 str(storm)
 storm$MORBI_t = storm$FATALITIES + storm$INJURIES 
 storm$MORBI_t <- apply( storm[,4:5],1,sum )
-colnames(storm)[17] = "MORBI_t"
-
-
-
+#colnames(storm)[17] = "MORBI_t"
 storm <-transform(storm, YEAR = as.numeric(as.character(YEAR)))
+str(storm)
+
+# delete factors with NAN
+table(factor(storm$EVTYPE))
+levels(storm$EVTYPE)
+storm$EVTYPE <- factor(storm$EVTYPE);
+table(factor(storm$EVTYPE))
 str(storm)
 
 
@@ -695,6 +701,93 @@ result <- heuristic(initnw=storm3.nw, data=storm4, prior=storm3.prior,
                     restart=2, degree=10, trace=FALSE)
 
 plot(getnetwork(result))
- 
+
+
+################# Map ################
+
+#** Map plots to support question 3
+#** (3) Across the United States, in which state people experienced the most number of Fatalities and Injuries?--------
+statecodeweb=url(paste("http://eunyoungko.com/resources/rprojectdata/economic/","statecode.csv", sep=""))
+statecode <- read.csv(statecodeweb,sep=",", header=TRUE)
+colnames(statecode)<-c("STATENAME","STATE")
+statecode
+storm_v=merge(storm,statecode, by="STATE", all.x=TRUE)
+head(storm_v)
+str(storm_v)
+storm_m = storm_v[,c(4,5,17, 8,9,10 )]
+storm_m.state = aggregate(storm_m, by = list(storm_v$STATENAME), FUN = sum)
+head(storm_m.state) 
+colnames(storm_m.state)[1] <- c("STATENAME")
+#** Morbi Map Plots ---------------
+#** FATALITY MAP Plot for each state
+head(storm_m.state[order(-storm_m.state$FATALITIES, na.last=TRUE),])
+MapFATALITIES <- gvisGeoChart(storm_m.state, "STATENAME", "FATALITIES",
+                              options=list(region="US", 
+                                        displayMode="regions", 
+                                        resolution="provinces",
+                                        width=600, height=400))
+g=plot(MapFATALITIES)
+print(MapFATALITIES,file="required_map_plots/MapFATALITIES.html")
+
+
+#** INJURIES MAP Plot for each state
+head(storm_m.state[order(-storm_m.state$INJURIES, na.last=TRUE),])
+MapINJURIES <- gvisGeoChart(storm_m.state, "STATENAME", "INJURIES",
+                              options=list(region="US", 
+                                           displayMode="regions", 
+                                           resolution="provinces",
+                                           width=600, height=400))
+g=plot(MapINJURIES)
+print(MapINJURIES,file="required_map_plots/MapINJURIES.html")
+
+
+#** MORBI_t MAP Plot for each state
+head(storm_m.state[order(-storm_m.state$MORBI_t, na.last=TRUE),])
+MapMORBI_t <- gvisGeoChart(storm_m.state, "STATENAME", "MORBI_t",
+                              options=list(region="US", 
+                                           displayMode="regions", 
+                                           resolution="provinces",
+                                           width=600, height=400))
+g=plot(MapMORBI_t)
+print(MapMORBI_t,file="required_map_plots/MapMORBI_t.html")
+
+
+
+#** property damage Map plots ----------------
+#** PROPDMG_t MAP Plot for each state
+head(storm_m.state[order(-storm_m.state$PROPDMG_t, na.last=TRUE),])
+MapPROPDMG_t <- gvisGeoChart(storm_m.state, "STATENAME", "PROPDMG_t",
+                              options=list(region="US", 
+                                           displayMode="regions", 
+                                           resolution="provinces",
+                                           width=600, height=400))
+g=plot(MapPROPDMG_t)
+print(MapPROPDMG_t,file="required_map_plots/MapPROPDMG_t.html")
+
+
+#** CROPDMG_t MAP Plot for each state
+head(storm_m.state[order(-storm_m.state$CROPDMG_t, na.last=TRUE),])
+MapCROPDMG_t <- gvisGeoChart(storm_m.state, "STATENAME", "CROPDMG_t",
+                              options=list(region="US", 
+                                           displayMode="regions", 
+                                           resolution="provinces",
+                                           width=600, height=400))
+g=plot(MapCROPDMG_t)
+print(MapCROPDMG_t,file="required_map_plots/MapCROPDMG_t.html")
+
+
+#** DMG_t MAP Plot for each state
+head(storm_m.state[order(-storm_m.state$DMG_t, na.last=TRUE),])
+MapDMG_t <- gvisGeoChart(storm_m.state, "STATENAME", "DMG_t",
+                           options=list(region="US", 
+                                        displayMode="regions", 
+                                        resolution="provinces",
+                                        width=600, height=400))
+g=plot(MapDMG_t)
+print(MapDMG_t,file="required_map_plots/MapDMG_t.html")
+
+
+
+
 
 
