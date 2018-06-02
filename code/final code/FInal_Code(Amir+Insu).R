@@ -16,7 +16,9 @@ getwd()
 #if you have already installed the packages only run line 12 and skip up to line 20
 packages <- c("R.utils", "data.table", "downloader", "lubridate", "plyr","dplyr",
               "rstudioapi","randomForest","tree","party","tidyr","broom","datasets",
-              "ggplot2","tabplot","PerformanceAnalytics","coefplot","RColorBrewer","igraph","bnlearn")
+              "ggplot2","tabplot","PerformanceAnalytics","coefplot","RColorBrewer",
+              "data.table","igraph", "rpart","network","bnlearn","lattice","party", 
+              "grid","partykit","deal")
 ipak <- function(pkg){
   new.pkg <- pkg[!(pkg %in% installed.packages()[, "Package"])]
   if (length(new.pkg)) 
@@ -335,15 +337,6 @@ saveRDS(x, file = "Cleandata.rda")
 # we did Random forest, barplot, variable importance plot
 # we defined 5 research question and the answers are provided below questions
 
-
-rm(list=ls())
-dev.off()
-# set directory
-setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
-curdir=dirname(rstudioapi::getActiveDocumentContext()$path)
-datadir <- curdir
-setwd(datadir)
-getwd()
 storm=readRDS('Cleandata.Rda')
 
 
@@ -502,7 +495,6 @@ str(storm1_s)
 rf = randomForest(DMG_t~., data=storm1_s, importance =T,  na.action=na.omit)  
 print(rf)  
 par(mfrow = c(1, 1), mar = c(11.5, 5, 4, 2), las = 3, cex = 0.5, cex.main = 1.4, cex.lab = 1.2)
-
 plot(rf, main="Random Forest Regression for ecomate (economic + climate + natural events) for estimating total damage (crop + property damage)")
 
 #--- optimal number of trees
@@ -528,7 +520,6 @@ str(storm2)
 storm2_s <-  storm_sample[,-c(1,3, 4, 5, 10)]
 str(storm2_s)
 
-str(storm2)
 # we removed DMG_t because it was the sum of crop damage (CROPDMG_t) and property damage (PROPDMG_t) to avoid repetitious features
 # We removed FATALITIES and INJURIES because MORBI_T is sum of them to extract real influencial factors 
 # we also remove factors to run random forest
@@ -567,49 +558,44 @@ storm3 = storm[,c(-1,-10,-17)]
 str(storm3)
 storm3_s = storm_sample[,c(-1, -10, -17)]
 str(storm3)
+
+
+table(factor(storm3$EVTYPE))
+levels(storm3$EVTYPE)
+storm3$EVTYPE <- factor(storm3$EVTYPE);
+table(factor(storm3$EVTYPE))
+str(storm3)
+
 #View(storm3)
 table(factor(storm3_s$EVTYPE))
 levels(storm3_s$EVTYPE)
 storm3_s$EVTYPE <- factor(storm3_s$EVTYPE);
 table(factor(storm3$EVTYPE))
 str(storm3_s)
-View(storm3_s)
 
-crf1 = randomForest(EVTYPE~., data=storm3_s, importance = T, method = " class", proximity = T )
-crf2 = randomForest(EVTYPE~., data=storm3_s, importance = T, method = " class", proximity = T )
-crf3 = randomForest(EVTYPE~., data=storm3_s, importance = T, method = " class", proximity = T )
-
-crf.all = combine(crf1,crf2,crf3)
-predict(crf.all, type='prob')
-
-crf$err.rate
-crf$
+crf = randomForest(EVTYPE~., data=storm3_s, importance = T, method = " class", proximity = T )
 print(crf)
-plot(crf)
-# n <- which.min(crf$mse); n   # give me the index which mse error of random forest is minimum
-# 
-# crf <- randomForest(EVTYPE~., data=storm3_s, 
-#                     ntree=n, importance=TRUE, method = " class", proximity = T, na.action=na.omit) 
+predict(crf, type='prob')
 
-table(storm3_s$EVTYPE)
-table(crf$predicted)
+plot(crf)
+
+# table(storm3_s$EVTYPE)
+# table(crf$predicted)
 
 library(RColorBrewer)
-
-par(mfrow = c(1, 1), mar = c(11.5, 5, 4, 2), las = 3, cex = 0.5, cex.main = 1.4, cex.lab = 1.2)
-
+par(mfrow = c(1, 1), las = 3, cex = 0.5, cex.main = 1.4, cex.lab = 1.2, xpd = T, mar = par()$mar + c(0,0,0,7))
 plot(crf, col=colorRampPalette(brewer.pal(11, "Spectral"))(14), lty = c(1,1,1,1,1,1,1,1,1,1,1,1,1,1),
      main="Random Forest Classification for event type estimating ")
-legend("topright", colnames(crf$err.rate), col=1:15,  lty = c(1,1,1,1,1,1,1,1,1,1,1,1,1,1)  , bty='n', y.intersp= 0.5)
+legend("topright", inset= c(-0.2,0),colnames(crf$err.rate), col=1:15,  lty = c(1,1,1,1,1,1,1,1,1,1,1,1,1,1)  , bty='n', y.intersp= 0.5)
 
 x = round(importance(crf),3)
-x
-?rainbow
-colorRampPalette(brewer.pal(11, "Spectral"))(14)
-?palette
-par(mfrow = c(1, 1), mar = c(11.5, 5, 4, 2), las = 1, cex = 0.5, cex.main = 1.4, cex.lab = 1.2)
-barplot(x[,1:14], legend.text = rownames(x), col=colorRampPalette(brewer.pal(11, "Spectral"))(14), main="Variable Importance")
-par(mfrow = c(1, 1), mar = c(11.5, 5, 4, 2), las = 1, cex = 0.5, cex.main = 1.4, cex.lab = 1.2)
+y = x[,1:14]
+#par(mfrow = c(1, 1), las = 3, cex = 0.5, cex.main = 1.4, cex.lab = 1.2, xpd = T, mar = par()$mar + c(0,0,0,7))
+barplot( y, legend.text = rownames(x), col=colorRampPalette(brewer.pal(11, "Spectral"))(14),
+         main="Variable Importance",
+         args.legend=list(x=ncol(y) + 3, y= max(colSums(y)) ) )
+
+        
 varImpPlot(crf, scale=T, main = "Variable Importance Plot for estimating morbi (Injuries + fatalities)")
 
 
@@ -624,6 +610,7 @@ varImpPlot(crf, scale=T, main = "Variable Importance Plot for estimating morbi (
 str(storm1)
 
 rfit = rpart(DMG_t~., data=storm1, method="anova", control = rpart.control(minsplit=10))
+par(mfrow = c(1, 1), mar = c(11.5, 5, 4, 2), las = 1, cex = 0.9, cex.main = 1.4, cex.lab = 1.2)
 plot(rfit, uniform=T, main="reg", margin=0.2)
 text(rfit,   use.n=TRUE, all= T, cex=0.8)
 
@@ -636,36 +623,23 @@ str(storm3)
 #storm3 <- storm[,-c(4,5, 8, 9, 14, 15)]
 str(storm3)
 cfit = rpart(EVTYPE~., data=storm3, method = "class")
-par(mfrow = c(3, 1), mar = c(11.5, 5, 4, 2), las = 1, cex = 0.5, cex.main = 1.4, cex.lab = 1.2)
+par(mfrow = c(3, 1), mar = c(11.5, 5, 4, 2), las = 1, cex = 0.9, cex.main = 1.4, cex.lab = 1.2)
 plot(as.party(cfit), tp_args = list(id=FALSE))
 
 ######### Bayesian Analysis ########################
-
-
-
-
-
-
-
+library(network)
+library(bnlearn)
+library(lattice)
+library(party)
 #** DMG_t --------
 str(storm1)
-row.names(storm1_s)
-# str(storm1[-c(6, 4, 2),])
-# dim(storm1_s[6,])
-# dim(storm1_s[2,])
-# storm1_s = storm1_s[c(-6,-4,-2),]
-# str(storm1_s)
-library(data.table)
-library(lattice)
-library(bnlearn)
-library(igraph)
-storm1_s <- na.omit(storm1_s)
-storm1_s <- as.data.frame(storm1_s)
 #learning a bayesian network from continues data
 bnhc <- hc(storm1, score="bic-g")# based on gausian 
 bnhc
 bnhc$nodes
 bnhc$arcs
+
+
 
 edges=arcs(bnhc)
 nodes=nodes(bnhc)
@@ -696,29 +670,31 @@ chart.Correlation(marks,pch=21,histogram=TRUE)
 
 #** EVTYPE
 
-str(storm)
-dim(storm)
-storm4 = storm[,-c(4, 5, 8, 9, 13, 14)]
+str(storm3)
+storm4 = storm3_s [,c(2,3,4,5,6,8,9,10,11,12,13,14)] # we removed year and crop_dmg because these columns caused Beysian analysis to become ill-conditioned because of two many repetitious values and zeros
 str(storm4)
-levels(storm4$EVTYPE)
-levels(storm4$STATE)
-storm4 = na.omit(storm4)
-str(storm4)
-storm4$STATE <- factor(storm4$STATE)
-storm4$EVTYPE <- factor(storm4$EVTYPE)
-levels(storm4$EVTYPE)
-levels(storm4$STATE)
+# dim(storm)
+# storm4 = storm[,-c(4, 5, 8, 9, 13, 14)]
+# str(storm4)
+# levels(storm4$EVTYPE)
+# levels(storm4$STATE)
+# storm4 = na.omit(storm4)
+# str(storm4)
+# storm4$STATE <- factor(storm4$STATE)
+# storm4$EVTYPE <- factor(storm4$EVTYPE)
+# levels(storm4$EVTYPE)
+# levels(storm4$STATE)
 
 
-storm4.nw <- network(storm4)          
-storm4.prior <- jointprior(storm4.nw) # make joint prior distribution
+storm3.nw <- network(storm4)          
+storm3.prior <- jointprior(storm3.nw) # make joint prior distribution
 # learn estimate parameters
-storm4.nw <- learn(storm4.nw,storm4,storm4.prior)$nw
+storm3.nw <- learn(storm3.nw,storm4,storm3.prior)$nw
 
-result <- heuristic(initnw=storm4.nw, data=storm4, prior=storm4.prior,
+result <- heuristic(initnw=storm3.nw, data=storm4, prior=storm3.prior,
                     restart=2, degree=10, trace=FALSE)
 
 plot(getnetwork(result))
-
+ 
 
 
