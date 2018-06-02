@@ -620,8 +620,28 @@ str(storm1_s)
 rf = randomForest(DMG_t~., data=storm1_s, importance =T,  na.action=na.omit)  
 print(rf)  
 par(mfrow = c(1, 1), mar = c(11.5, 5, 4, 2), las = 3, cex = 0.5, cex.main = 1.4, cex.lab = 1.2)
-
 plot(rf, main="Random Forest Regression for ecomate (economic + climate + natural events) for estimating total damage (crop + property damage)")
+str(rf$test)
+#?randomForest
+length(rf$mse)
+?rep
+#nrow(rf$mse)
+#rep(1:nrow(rf$mse),1)
+x<-rep(1:length(rf$mse))
+y<-rf$mse
+rfd<-data.frame(x,y)
+
+ggplot(rfd, aes(x, y))+
+  #geom_point(col='blue')+
+  geom_line(col='blue')+
+  #stat_smooth(method='lm', col='red')+
+  theme_bw()+
+  xlab('Number of trees')+
+  ylab('Error (MSE)')+
+  ggtitle("Random Forest Regression for Ecomate (Economiy+Climate+Natural Events) for estimating total damage")+
+  theme(plot.title = element_text(hjust = 0.5))
+
+
 
 #--- optimal number of trees
 n <- which.min(rf$mse); n   # give me the index which mse error of random forest is minimum
@@ -654,7 +674,24 @@ str(storm2)
 rf = randomForest(MORBI_t~., data=storm2_s, importance =T,  na.action=na.omit)  # remove factors to run random forest
 print(rf)  
 par(mfrow = c(1, 1), mar = c(11.5, 5, 4, 2), las = 3, cex = 0.5, cex.main = 1.4, cex.lab = 1.2)
-plot(rf, main="Random Forest Regression for ecomate (economic + climate + natural events) for estimating Morbi (fatalities + injueirs)")
+#plot(rf, main="Random Forest Regression for ecomate (economic + climate + natural events) for estimating Morbi (fatalities + injueirs)")
+
+x<-rep(1:length(rf$mse))
+y<-rf$mse
+rfd<-data.frame(x,y)
+
+ggplot(rfd, aes(x, y))+
+  #geom_point(col='blue')+
+  geom_line(col='blue')+
+  #stat_smooth(method='lm', col='red')+
+  theme_bw()+
+  xlab('Number of trees')+
+  ylab('Error (MSE)')+
+  ggtitle("Random Forest Regression for Ecomate (Economy+Climate+Natural Events) for estimating Morbimortalities")+
+  theme(plot.title = element_text(hjust = 0.5))
+
+
+
 
 #--- optimal number of trees
 n <- which.min(rf$mse); n   # give me the index which mse error of random forest is minimum
@@ -668,7 +705,7 @@ par(mfrow = c(1, 1), mar = c(11.5, 5, 4, 2), las = 1, cex = 0.5, cex.main = 1.4,
 varImpPlot(rf2, scale=T, main = "Variable Importance Plot for estimating morbi (Injuries + fatalities)")
 
 
-#** (5) question: which variables(colums, features) are more influencial in the estimation of event type? ------
+#** (6) question: which variables(colums, features) are more influencial in the estimation of event type? ------
 #   Answer: As it is shown in important variables plot, the most influencial variables are:
 #   tmax, LONGITUDE, F, pcp, pop, ...
 #   which makes sense, like our previous interpretation of result again LONGITUDE is influencial (place of living is important), 
@@ -685,32 +722,52 @@ storm3 = storm[,c(-1,-10,-17)]
 str(storm3)
 storm3_s = storm_sample[,c(-1, -10, -17)]
 str(storm3)
+
+
+table(factor(storm3$EVTYPE))
+levels(storm3$EVTYPE)
+storm3$EVTYPE <- factor(storm3$EVTYPE);
+table(factor(storm3$EVTYPE))
+str(storm3)
+
 #View(storm3)
 table(factor(storm3_s$EVTYPE))
 levels(storm3_s$EVTYPE)
 storm3_s$EVTYPE <- factor(storm3_s$EVTYPE);
 table(factor(storm3$EVTYPE))
 str(storm3_s)
-View(storm3_s)
 
-crf1 = randomForest(EVTYPE~., data=storm3_s, importance = T, method = " class", proximity = T )
-crf2 = randomForest(EVTYPE~., data=storm3_s, importance = T, method = " class", proximity = T )
-crf3 = randomForest(EVTYPE~., data=storm3_s, importance = T, method = " class", proximity = T )
+crf = randomForest(EVTYPE~., data=storm3_s, importance = T, method = " class", proximity = T )
+print(crf)
+predict(crf, type='prob')
 
-crf.all = combine(crf1,crf2,crf3)
-predict(crf.all, type='prob')
+#plot(crf)
 
-crf$err.rate
-crf$
-  print(crf)
-plot(crf)
-# n <- which.min(crf$mse); n   # give me the index which mse error of random forest is minimum
-# 
-# crf <- randomForest(EVTYPE~., data=storm3_s, 
-#                     ntree=n, importance=TRUE, method = " class", proximity = T, na.action=na.omit) 
 
-table(storm3_s$EVTYPE)
-table(crf$predicted)
+
+
+x<-rep(list(1:length(crf$err.rate[,1])),length(crf$err.rate[1,]))
+y<-crf$err.rate
+#head(y)
+str(y)
+str(x)
+#head(x, 501)
+rfd<-data.frame(y)
+str(y[,1])
+ggplot(rfd, aes(x=y[,1], y))+
+  #geom_point(col='blue')+
+  geom_line(col='blue')+
+  #stat_smooth(method='lm', col='red')+
+  theme_bw()+
+  xlab('Number of trees')+
+  ylab('Error (MSE)')+
+  ggtitle("Random Forest Regression for Ecomate (Economy+Climate+Natural Events) for estimating Morbimortalities")+
+  theme(plot.title = element_text(hjust = 0.5))
+
+
+
+
+
 
 library(RColorBrewer)
 
