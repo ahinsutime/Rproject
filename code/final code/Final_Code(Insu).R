@@ -549,14 +549,14 @@ par(mfrow = c(3, 1), mar = c(11.5, 5, 4, 2), las = 3, cex = 0.5, cex.main = 1.4,
 #with(morbimortality.state.sorted[1:nr,], barplot(Total, names.arg = morbimortality.state.sorted$State[1:nr], col = "blue", ylab = "Morbimortality", main = "Total (Fatalities + Injuries) - State"))
 
 
-Faty<-fatalities.year.sorted[1:nr,]
-Faty$Year <- factor(Faty$Year, levels = Faty$Year[order(-Faty$Fatalities)])
+Fats<-fatalities.state.sorted[1:nr,]
+Fats$State <- factor(Fats$State, levels = Fats$State[order(-Fats$Fatalities)])
 
-ggplot(Faty, aes(x=Year, y=Fatalities, fill=Year))+
+ggplot(Fats, aes(x=State, y=Fatalities, fill=State))+
   geom_bar(stat="identity", position="dodge")+
-  xlab("Year")+
+  xlab("State")+
   ylab("Fatalities")+
-  ggtitle("Fatalities vs Year")+
+  ggtitle("Fatalities vs State")+
   theme_bw()+
   theme(axis.text.x = element_text(angle = 90, hjust = 1))+
   theme(plot.title = element_text(hjust = 0.5))
@@ -702,7 +702,7 @@ predict(crf.all, type='prob')
 
 crf$err.rate
 crf$
-print(crf)
+  print(crf)
 plot(crf)
 # n <- which.min(crf$mse); n   # give me the index which mse error of random forest is minimum
 # 
