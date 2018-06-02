@@ -348,8 +348,13 @@ storm=readRDS('Cleandata.Rda')
 
 
 #--------- adding total Morbimortality to data columns
-
+str(storm)
 storm$MORBI_t = storm$FATALITIES + storm$INJURIES 
+storm$MORBI_t <- apply( storm[,4:5],1,sum )
+colnames(storm)[17] = "MORBI_t"
+
+
+
 storm <-transform(storm, YEAR = as.numeric(as.character(YEAR)))
 str(storm)
 
@@ -652,7 +657,8 @@ row.names(storm1_s)
 # str(storm1_s)
 library(data.table)
 library(lattice)
-
+library(bnlearn)
+library(igraph)
 storm1_s <- na.omit(storm1_s)
 storm1_s <- as.data.frame(storm1_s)
 #learning a bayesian network from continues data
