@@ -1,0 +1,311 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>GeoChartID588b3604cf57</title>
+<meta http-equiv="content-type" content="text/html;charset=utf-8" />
+<style type="text/css">
+body {
+  color: #444444;
+  font-family: Arial,Helvetica,sans-serif;
+  font-size: 75%;
+  }
+  a {
+  color: #4D87C7;
+  text-decoration: none;
+}
+</style>
+</head>
+<body>
+ <!-- GeoChart generated in R 3.4.3 by googleVis 0.6.2 package -->
+<!-- Sat Jun  2 05:53:14 2018 -->
+
+
+<!-- jsHeader -->
+<script type="text/javascript">
+ 
+// jsData 
+function gvisDataGeoChartID588b3604cf57 () {
+var data = new google.visualization.DataTable();
+var datajson =
+[
+ [
+"Alabama",
+49.3
+],
+[
+"Alaska",
+19.4
+],
+[
+"Arizona",
+45.4
+],
+[
+"Arkansas",
+48
+],
+[
+"California",
+45.1
+],
+[
+"Colorado",
+32
+],
+[
+"Connecticut",
+36.3
+],
+[
+"Delaware",
+42.2
+],
+[
+"Florida",
+58.2
+],
+[
+"Georgia",
+49.7
+],
+[
+"Idaho",
+32
+],
+[
+"Illinois",
+39.4
+],
+[
+"Indiana",
+37.8
+],
+[
+"Iowa",
+36.6
+],
+[
+"Kansas",
+42.6
+],
+[
+"Kentucky",
+41.4
+],
+[
+"Louisiana",
+54.2
+],
+[
+"Maine",
+28.8
+],
+[
+"Maryland",
+41.3
+],
+[
+"Massachusetts",
+35.4
+],
+[
+"Michigan",
+31.9
+],
+[
+"Minnesota",
+30.1
+],
+[
+"Mississippi",
+50.2
+],
+[
+"Missouri",
+42.6
+],
+[
+"Montana",
+30.3
+],
+[
+"Nebraska",
+37.1
+],
+[
+"Nevada",
+36.3
+],
+[
+"New Hampshire",
+30
+],
+[
+"New Jersey",
+39.6
+],
+[
+"New Mexico",
+38.1
+],
+[
+"New York",
+32.5
+],
+[
+"North Carolina",
+44.9
+],
+[
+"North Dakota",
+29.6
+],
+[
+"Ohio",
+36.9
+],
+[
+"Oklahoma",
+47.6
+],
+[
+"Oregon",
+36.2
+],
+[
+"Pennsylvania",
+34.9
+],
+[
+"Rhode Island",
+38.3
+],
+[
+"South Carolina",
+48.7
+],
+[
+"South Dakota",
+33.7
+],
+[
+"Tennessee",
+43.6
+],
+[
+"Texas",
+52.2
+],
+[
+"Utah",
+35.6
+],
+[
+"Vermont",
+29.1
+],
+[
+"Virginia",
+41.1
+],
+[
+"Washington",
+37.1
+],
+[
+"West Virginia",
+37.1
+],
+[
+"Wisconsin",
+30.8
+],
+[
+"Wyoming",
+29.5
+] 
+];
+data.addColumn('string','STATENAME');
+data.addColumn('number','tmin');
+data.addRows(datajson);
+return(data);
+}
+ 
+// jsDrawChart
+function drawChartGeoChartID588b3604cf57() {
+var data = gvisDataGeoChartID588b3604cf57();
+var options = {};
+options["width"] = 600;
+options["height"] = 400;
+options["region"] = "US";
+options["displayMode"] = "regions";
+options["resolution"] = "provinces";
+
+
+    var chart = new google.visualization.GeoChart(
+    document.getElementById('GeoChartID588b3604cf57')
+    );
+    chart.draw(data,options);
+    
+
+}
+  
+ 
+// jsDisplayChart
+(function() {
+var pkgs = window.__gvisPackages = window.__gvisPackages || [];
+var callbacks = window.__gvisCallbacks = window.__gvisCallbacks || [];
+var chartid = "geochart";
+  
+// Manually see if chartid is in pkgs (not all browsers support Array.indexOf)
+var i, newPackage = true;
+for (i = 0; newPackage && i < pkgs.length; i++) {
+if (pkgs[i] === chartid)
+newPackage = false;
+}
+if (newPackage)
+  pkgs.push(chartid);
+  
+// Add the drawChart function to the global list of callbacks
+callbacks.push(drawChartGeoChartID588b3604cf57);
+})();
+function displayChartGeoChartID588b3604cf57() {
+  var pkgs = window.__gvisPackages = window.__gvisPackages || [];
+  var callbacks = window.__gvisCallbacks = window.__gvisCallbacks || [];
+  window.clearTimeout(window.__gvisLoad);
+  // The timeout is set to 100 because otherwise the container div we are
+  // targeting might not be part of the document yet
+  window.__gvisLoad = setTimeout(function() {
+  var pkgCount = pkgs.length;
+  google.load("visualization", "1", { packages:pkgs, callback: function() {
+  if (pkgCount != pkgs.length) {
+  // Race condition where another setTimeout call snuck in after us; if
+  // that call added a package, we must not shift its callback
+  return;
+}
+while (callbacks.length > 0)
+callbacks.shift()();
+} });
+}, 100);
+}
+ 
+// jsFooter
+</script>
+ 
+<!-- jsChart -->  
+<script type="text/javascript" src="https://www.google.com/jsapi?callback=displayChartGeoChartID588b3604cf57"></script>
+ 
+<!-- divChart -->
+  
+<div id="GeoChartID588b3604cf57" 
+  style="width: 600; height: 400;">
+</div>
+ <div><span>Data: tempdata_v_1963 &#8226; Chart ID: <a href="Chart_GeoChartID588b3604cf57.html">GeoChartID588b3604cf57</a> &#8226; <a href="https://github.com/mages/googleVis">googleVis-0.6.2</a></span><br /> 
+<!-- htmlFooter -->
+<span> 
+  R version 3.4.3 (2017-11-30) 
+  &#8226; <a href="https://developers.google.com/terms/">Google Terms of Use</a> &#8226; <a href="https://google-developers.appspot.com/chart/interactive/docs/gallery/geochart">Documentation and Data Policy</a>
+</span></div>
+</body>
+</html>
