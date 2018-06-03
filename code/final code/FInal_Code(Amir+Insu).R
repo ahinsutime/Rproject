@@ -856,7 +856,7 @@ nodes=nodes(bnhc)
 #cols = colorRampPalette(brewer.pal(11, "Spectral"))(length(colnames(storm1)))
 net <- graph.data.frame(edges,directed=T,vertices=nodes)
 par(mfrow = c(1, 1), mar = c(4, 0.1, 4, 0.1), las = 3, cex = 0.8, cex.main = 1.4, cex.lab = 1.2)
-plot(net,vertex.label=V(net)$name,vertex.size=(8*nchar(V(net)$name)),
+plot(net,vertex.label=V(net)$name,vertex.size=(3*nchar(V(net)$name)),
      main="Bayesian Network Plot on Total Damage",
      #xlab=colnames(storm1),
      edge.arrow.size=0.3,vertex.color=colorRampPalette(brewer.pal(11, "Spectral"))(length(colnames(storm1))),
@@ -877,7 +877,7 @@ bnhc$arcs
 edges=arcs(bnhc)
 nodes=nodes(bnhc)
 net <- graph.data.frame(edges,directed=T,vertices=nodes)
-plot(net,vertex.label=V(net)$name,vertex.size=(8*nchar(V(net)$name)),
+plot(net,vertex.label=V(net)$name,vertex.size=(3*nchar(V(net)$name)),
      main="Bayesian Network Plot on Morbimortalities",
      #xlab=colnames(storm1),
      edge.arrow.size=0.3,vertex.color=colorRampPalette(brewer.pal(11, "Spectral"))(length(colnames(storm2))),
@@ -962,6 +962,7 @@ MapPROPDMG_t <- gvisGeoChart(storm_m.state, "STATENAME", "PROPDMG_t",
                              options=list(region="US", 
                                           displayMode="regions", 
                                           resolution="provinces",
+                                          colors="red"
                                           width=600, height=400))
 g=plot(MapPROPDMG_t)
 print(MapPROPDMG_t,file="required_map_plots/MapPROPDMG_t.html")
@@ -973,6 +974,7 @@ MapCROPDMG_t <- gvisGeoChart(storm_m.state, "STATENAME", "CROPDMG_t",
                              options=list(region="US", 
                                           displayMode="regions", 
                                           resolution="provinces",
+                                          colors="yellow",
                                           width=600, height=400))
 g=plot(MapCROPDMG_t)
 print(MapCROPDMG_t,file="required_map_plots/MapCROPDMG_t.html")
@@ -984,6 +986,7 @@ MapDMG_t <- gvisGeoChart(storm_m.state, "STATENAME", "DMG_t",
                          options=list(region="US", 
                                       displayMode="regions", 
                                       resolution="provinces",
+                                      colors="orange",
                                       width=600, height=400))
 g=plot(MapDMG_t)
 print(MapDMG_t,file="required_map_plots/MapDMG_t.html")
