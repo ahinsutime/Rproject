@@ -795,7 +795,7 @@ plot(as.party(cfit),
      tp_args = list(id=FALSE))
 
 ######### Bayesian Analysis ########################
-#install.packages("bnlearn")
+install.packages("bnlearn")
 library(data.table)
 library(lattice)
 #library(bnlearn)
@@ -818,19 +818,15 @@ nodes=nodes(bnhc)
 
 #cols = colorRampPalette(brewer.pal(11, "Spectral"))(length(colnames(storm1)))
 net <- graph.data.frame(edges,directed=T,vertices=nodes)
-#txt <- toString(colnames(storm1), Width = " ")
-#str(txt)
-#nchar(V(net)$name[2])
-#str(V(net)[1])
 par(mfrow = c(1, 1), mar = c(4, 0.1, 4, 0.1), las = 3, cex = 0.8, cex.main = 1.4, cex.lab = 1.2)
 plot(net,vertex.label=V(net)$name,vertex.size=(8*nchar(V(net)$name)),
-     main="Bayesian Network Plot",
+     main="Bayesian Network Plot on Total Damage",
      #xlab=colnames(storm1),
      edge.arrow.size=0.3,vertex.color=colorRampPalette(brewer.pal(11, "Spectral"))(length(colnames(storm1))),
      edge.color="black")
 text(0, -1.5, toString(colnames(storm1), Width = " "), cex = .8, font=2)
 
-chart.Correlation(marks,pch=21,histogram=TRUE)
+chart.Correlation(storm1,pch=21,histogram=TRUE)
 
 #** MORBI_t --------------
 str(storm2)
@@ -844,11 +840,15 @@ bnhc$arcs
 edges=arcs(bnhc)
 nodes=nodes(bnhc)
 net <- graph.data.frame(edges,directed=T,vertices=nodes)
-plot(net,vertex.label=V(net)$name,vertex.size=40,
-     edge.arrow.size=0.3,vertex.color="cyan",
+plot(net,vertex.label=V(net)$name,vertex.size=(8*nchar(V(net)$name)),
+     main="Bayesian Network Plot on Morbimortalities",
+     #xlab=colnames(storm1),
+     edge.arrow.size=0.3,vertex.color=colorRampPalette(brewer.pal(11, "Spectral"))(length(colnames(storm2))),
      edge.color="black")
+text(0, -1.5, toString(colnames(storm2), Width = " "), cex = .8, font=2)
 
-chart.Correlation(marks,pch=21,histogram=TRUE)
+
+chart.Correlation(storm2,pch=21,histogram=TRUE)
 
 #** EVTYPE
 library(deal)
@@ -863,9 +863,10 @@ storm3.nw <- learn(storm3.nw,storm4,storm3.prior)$nw
 
 result <- heuristic(initnw=storm3.nw, data=storm4, prior=storm3.prior,
                     restart=2, degree=10, trace=FALSE)
-par(mfrow = c(1, 1), mar = c(11.5, 5, 4, 2), las = 3, cex = 0.8, cex.main = 1.4, cex.lab = 1.2)
-plot(getnetwork(result))
-
+par(mfrow = c(1, 1), mar = c(11.5, 5, 4, 2), las = 3, cex = 0.8, cex.main = 1.4, cex.lab = 0.2)
+plot(getnetwork(result),
+     main="Bayesian Network Plot on Event Type")
+text(170, -50, toString(colnames(storm4), Width = " "), cex = .8, font=2)
 
 ################# Map ################
 library(googleVis)
