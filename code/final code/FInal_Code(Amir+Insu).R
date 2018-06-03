@@ -339,14 +339,6 @@ saveRDS(x, file = "Cleandata.rda")
 # we defined 5 research question and the answers are provided below questions
 
 
-#rm(list=ls())
-# #dev.off()
-# # set directory
-# setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
-# curdir=dirname(rstudioapi::getActiveDocumentContext()$path)
-# datadir <- curdir
-# setwd(datadir)
-# getwd()
 storm=readRDS('Cleandata.Rda')
 
 
@@ -364,12 +356,6 @@ levels(storm$EVTYPE)
 storm$EVTYPE <- factor(storm$EVTYPE);
 table(factor(storm$EVTYPE))
 str(storm)
-
-
-#storm_f$INJURIES = storm8$INJURIES
-# saveRDS(storm_f,file = 'storm_f2.Rda')
-# write('storm_f.Rda')
-# ?write
 
 ##########Research Questions #######
 
@@ -474,15 +460,12 @@ colnames(morbimortality.year)[4] = "Total"
 morbimortality.year.sorted <- morbimortality.year[order(-morbimortality.year$Total, na.last=TRUE), ]
 head(morbimortality.year.sorted)
 
-
 # barplot of Fatalities and Injuries by event type
 nr = 15 # just show 15 top values
 par(mfrow = c(3, 1), mar = c(11.5, 5, 4, 2), las = 3, cex = 0.5, cex.main = 1.4, cex.lab = 1.2)
 #with(fatalities.year.sorted[1:nr,], barplot(Fatalities, names.arg = fatalities.year.sorted$Year[1:nr], col = "red", ylab = "Fatalities", main = "Fatalities - Year"))
 #with(injuries.year.sorted[1:nr,], barplot(Injuries, names.arg = injuries.year.sorted$Year[1:nr], col = "green", ylab = "Injuries", main = "Injuries - Year"))
 #with(morbimortality.year.sorted[1:nr,], barplot(Total, names.arg = morbimortality.year.sorted$Year[1:nr], col = "blue", ylab = "Injuries", main = "Total (Fatalities + Injuries) - Year"))
-
-
 
 Faty<-fatalities.year.sorted[1:nr,]
 Faty$Year <- factor(Faty$Year, levels = Faty$Year[order(-Faty$Fatalities)])
@@ -496,8 +479,6 @@ ggplot(Faty, aes(x=Year, y=Fatalities, fill=Year))+
   theme(axis.text.x = element_text(angle = 90, hjust = 1))+
   theme(plot.title = element_text(hjust = 0.5))
 
-
-
 Injy<-injuries.year.sorted[1:nr,]
 Injy$Year <- factor(Injy$Year, levels = Injy$Year[order(-Injy$Injuries)])
 
@@ -509,7 +490,6 @@ ggplot(Injy, aes(x=Year, y=Injuries, fill=Year))+
   theme_bw()+
   theme(axis.text.x = element_text(angle = 90, hjust = 1))+
   theme(plot.title = element_text(hjust = 0.5))
-
 
 Mory<-morbimortality.year.sorted[1:nr,]
 Mory$Year <- factor(Mory$Year, levels = Mory$Year[order(-Mory$Total)])
@@ -547,14 +527,12 @@ colnames(morbimortality.state)[4] = "Total"
 morbimortality.state.sorted <- morbimortality.state[order(-morbimortality.state$Total, na.last=TRUE), ]
 head(morbimortality.state.sorted)
 
-
 # barplot of Fatalities and Injuries by event type
 nr = 15 # just show 15 top values
 par(mfrow = c(3, 1), mar = c(11.5, 5, 4, 2), las = 3, cex = 0.5, cex.main = 1.4, cex.lab = 1.2)
 #with(fatalities.state.sorted[1:nr,], barplot(Fatalities, names.arg = fatalities.state.sorted$State[1:nr], col = "red", ylab = "Fatalities", main = "Fatalities - State"))
 #with(injuries.state.sorted[1:nr,], barplot(Injuries, names.arg = injuries.state.sorted$State[1:nr], col = "green", ylab = "Injuries", main = "Injuries - State"))
 #with(morbimortality.state.sorted[1:nr,], barplot(Total, names.arg = morbimortality.state.sorted$State[1:nr], col = "blue", ylab = "Morbimortality", main = "Total (Fatalities + Injuries) - State"))
-
 
 Fats<-fatalities.state.sorted[1:nr,]
 Fats$State <- factor(Fats$State, levels = Fats$State[order(-Fats$Fatalities)])
@@ -568,8 +546,6 @@ ggplot(Fats, aes(x=State, y=Fatalities, fill=State))+
   theme(axis.text.x = element_text(angle = 90, hjust = 1))+
   theme(plot.title = element_text(hjust = 0.5))
 
-
-
 Injs<-injuries.state.sorted[1:nr,]
 Injs$State <- factor(Injs$State, levels = Injs$State[order(-Injy$Injuries)])
 
@@ -582,7 +558,6 @@ ggplot(Injs, aes(x=State, y=Injuries, fill=State))+
   theme(axis.text.x = element_text(angle = 90, hjust = 1))+
   theme(plot.title = element_text(hjust = 0.5))
 
-
 Mors<-morbimortality.state.sorted[1:nr,]
 Mors$State <- factor(Mors$State, levels = Mors$State[order(-Mory$Total)])
 
@@ -594,8 +569,6 @@ ggplot(Mors, aes(x=State, y=Total, fill=State))+
   theme_bw()+
   theme(axis.text.x = element_text(angle = 90, hjust = 1))+
   theme(plot.title = element_text(hjust = 0.5))
-
-# event type
 
 ############ Random Forest ###################
 
@@ -645,10 +618,8 @@ ggplot(rfd, aes(x, y))+
   theme_bw()+
   xlab('Number of trees')+
   ylab('Error (MSE)')+
-  ggtitle("Random Forest Regression for Ecomate (Economiy+Climate+Natural Events) for estimating total damage")+
+  ggtitle("Random Forest Regression of Ecomate for Estimating Total Damage")+
   theme(plot.title = element_text(hjust = 0.5))
-
-
 
 #--- optimal number of trees
 n <- which.min(rf$mse); n   # give me the index which mse error of random forest is minimum
@@ -659,7 +630,7 @@ rf2 <- randomForest(DMG_t~., data=storm1_s,
 #--- Importance of variables in estimating total damage (DMG_t): higher value mean more important
 #  this importance will give you which feature is important in deciding this tree
 par(mfrow = c(1, 1), mar = c(11.5, 5, 4, 2), las = 1, cex = 0.5, cex.main = 1.4, cex.lab = 1.2)
-varImpPlot(rf2, scale=T, main = "Variable Importance Plot for estimating total damage (crop + property damage)")
+varImpPlot(rf2, scale=T, main = "Variable Importance Plot for Estimating Total Damage (Crop + Property Damage)")
 
 #** (5) question: which variables(colums) are more influencial in the estimation of total morbimortality (injuries + fatalities)?
 #   Answer: As it is shown in important variables plot, the most influencial variables are:
@@ -693,11 +664,8 @@ ggplot(rfd, aes(x, y))+
   theme_bw()+
   xlab('Number of trees')+
   ylab('Error (MSE)')+
-  ggtitle("Random Forest Regression for Ecomate (Economy+Climate+Natural Events) for estimating Morbimortalities")+
+  ggtitle("Random Forest Regression of Ecomate for Estimating Morbimortalities")+
   theme(plot.title = element_text(hjust = 0.5))
-
-
-
 
 #--- optimal number of trees
 n <- which.min(rf$mse); n   # give me the index which mse error of random forest is minimum
@@ -708,8 +676,7 @@ rf2 <- randomForest(MORBI_t~., data=storm2_s,
 #--- Importance of variables in estimating total damage (DMG_t): higher value mean more important
 #  this importance will give you which feature is important in deciding this tree
 par(mfrow = c(1, 1), mar = c(11.5, 5, 4, 2), las = 1, cex = 0.5, cex.main = 1.4, cex.lab = 1.2)
-varImpPlot(rf2, scale=T, main = "Variable Importance Plot for estimating morbi (Injuries + fatalities)")
-
+varImpPlot(rf2, scale=T, main = "Variable Importance Plot for Estimating Morbimortalities")
 
 #** (6) question: which variables(colums, features) are more influencial in the estimation of event type? ------
 #   Answer: As it is shown in important variables plot, the most influencial variables are:
@@ -717,7 +684,6 @@ varImpPlot(rf2, scale=T, main = "Variable Importance Plot for estimating morbi (
 #   which makes sense, like our previous interpretation of result again LONGITUDE is influencial (place of living is important), 
 #   population is important (more population leads to more morbi and Fujita(Thurnado power) are among most influencial features)
 #   but in this case, morbi is not influenced by economical condition (rgdp), even if you are rich, if the natural even is strong, you will die!! :D
-
 
 #** Random forest for estimating event type (EVTYPE) ------------
 # we removed crop damage (CROPDMG_t) and property damage (PROPDMG_t) because DMG_t is the sum of these two variables, and it is better to be removed to 
@@ -728,7 +694,6 @@ storm3 = storm[,c(-1,-10,-17)]
 str(storm3)
 storm3_s = storm_sample[,c(-1, -10, -17)]
 str(storm3)
-
 
 table(factor(storm3$EVTYPE))
 levels(storm3$EVTYPE)
@@ -749,7 +714,6 @@ predict(crf, type='prob')
 
 plot(crf)
 
-
 err<-crf$err.rate
 names(err[1,])
 library(reshape2)
@@ -759,8 +723,6 @@ str(err[1,])
 test <- data.frame(hmm=err, trees=as.numeric(rep(1:500)))
 head(test)
 
-#test_data_long <- melt(test, id="trees")  # convert to long format
-#str(test_data_long)
 str(test)
 library(RColorBrewer)
 labels <- as.factor(names(err[1,]))
@@ -785,15 +747,10 @@ ggplot(data=test,aes(x=trees)) +
   scale_colour_manual(name="Event Types",labels = names(err[1,]),values=cols)+
   xlab('Number of trees')+
   ylab('Error (MSE)')+
-  ggtitle("Random Forest Regression for Ecomate (Economy+Climate+Natural Events) for estimating Event Types")+
+  ggtitle("Random Forest Regression of Ecomate for estimating Event Types")+
   theme(plot.title = element_text(hjust = 0.5))+
-  # scale_color_manual(labels = c("T999", "T888"), values = c("blue", "red")) +
   theme_bw() 
 
-
-# theme(axis.text.x=element_text(size=14), axis.title.x=element_text(size=16),
-#       axis.text.y=element_text(size=14), axis.title.y=element_text(size=16),
-#       plot.title=element_text(size=20, face="bold", color="darkgreen"))
 
 library(RColorBrewer)
 # par(mfrow = c(1, 1), las = 3, cex = 0.5, cex.main = 1.4, cex.lab = 1.2, xpd = T, mar = par()$mar + c(0,0,0,7))
@@ -803,10 +760,16 @@ library(RColorBrewer)
 
 x = round(importance(crf),3)
 y = x[,1:14]
-par(mfrow = c(1, 1), las = 3, cex = 0.5, cex.main = 1.4, cex.lab = 1.2, xpd = T, mar = par()$mar + c(0,0,0,7))
+str(y)
+
+par(mfrow = c(1, 1), las = 3, cex = 0.8, cex.main = 1.4, cex.lab = 1.2, xpd = F, mar = c(10,7,3,9), mgp = c(5, 1, 0))
+
 barplot( y, legend.text = rownames(x), col=colorRampPalette(brewer.pal(11, "Spectral"))(14),
-         main="Variable Importance",
-         args.legend=list(x=ncol(y) + 5, y= max(colSums(y))) )
+         main="Variable Importance Plot for Estimating Event Type",
+         xlab="Event",
+         ylab="Importance",
+         args.legend=list(x=ncol(y) + 7, y= max(colSums(y))) )
+abline(h=0, col="black")
 
 
 # ct = ctree(EVTYPE~., data=storm3)
@@ -815,18 +778,19 @@ barplot( y, legend.text = rownames(x), col=colorRampPalette(brewer.pal(11, "Spec
 # print(rf)  
 # par(mfrow = c(1, 1), mar = c(11.5, 5, 4, 2), las = 3, cex = 0.5, cex.main = 1.4, cex.lab = 1.2)
 
-
 ########## Recursive Partitioning (Decision trees) ######################
 str(storm1)
 
 rfit = rpart(DMG_t~., data=storm1, method="anova", control = rpart.control(minsplit=10))
-par(mfrow = c(1, 1), mar = c(11.5, 5, 4, 2), las = 1, cex = 0.9, cex.main = 1.4, cex.lab = 1.2)
-plot(rfit, uniform=T, main="reg", margin=0.2)
+par(mfrow = c(1, 1), mar = c(11.5, 5, 4, 2), las = 1, cex = 1, cex.main = 1.4, cex.lab = 1.2)
+plot(rfit, uniform=T,
+     main="Recursive Partitioning Tree on Total Damage", margin=0.2)
 text(rfit,   use.n=TRUE, all= T, cex=0.8)
 
 str(storm2)
 rfit = rpart(MORBI_t~., data=storm2, method="anova", control = rpart.control(minsplit=10))
-plot(rfit, uniform=T, main="reg", margin=0.2)
+par(mfrow = c(1, 1), mar = c(0.1, 0.1, 3, 0.1), las = 1, cex = 1, cex.main = 1.4, cex.lab = 1.2)
+plot(rfit, uniform=T, main="Recursive Partitioning Tree on Morbimortality", margin=0.2)
 text(rfit,   use.n=TRUE, all= T, cex=0.8)
 
 str(storm3)
@@ -834,7 +798,9 @@ str(storm3)
 str(storm3)
 cfit = rpart(EVTYPE~., data=storm3, method = "class")
 par(mfrow = c(3, 1), mar = c(11.5, 5, 4, 2), las = 1, cex = 0.9, cex.main = 1.4, cex.lab = 1.2)
-plot(as.party(cfit), tp_args = list(id=FALSE))
+plot(as.party(cfit), 
+     main="Recursive Partitioning Tree on Event Type",
+     tp_args = list(id=FALSE))
 
 ######### Bayesian Analysis ########################
 #install.packages("bnlearn")
@@ -843,11 +809,8 @@ library(data.table)
 library(lattice)
 #library(bnlearn)
 library(igraph)
-library(stats)
-library(base)
 library(bnlearn)
-library(network)
-library(PerformanceAnalytics)
+#library(network)
 #** DMG_t --------
 str(storm1)
 #learning a bayesian network from continues data
@@ -855,8 +818,6 @@ bnhc <- hc(storm1, score="bic-g")# based on gausian
 bnhc
 bnhc$nodes
 bnhc$arcs
-
-
 
 edges=arcs(bnhc)
 nodes=nodes(bnhc)
