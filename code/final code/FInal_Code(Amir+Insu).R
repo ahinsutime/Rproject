@@ -623,7 +623,6 @@ rf2 <- randomForest(DMG_t~., data=storm1_s,
 #  this importance will give you which feature is important in deciding this tree
 par(mfrow = c(1, 1), mar = c(11.5, 5, 4, 2), las = 1, cex = 0.5, cex.main = 1.4, cex.lab = 1.2)
 varImpPlot(rf2, scale=T, main = "Variable Importance Plot for Estimating Total Damage (Crop + Property Damage)")
-
 #** (5) question: which variables(colums) are more influencial in the estimation of total morbimortality (injuries + fatalities)?
 #   Answer: As it is shown in important variables plot, the most influencial variables are:
 #   tmax, LONGITUDE, F, pcp, pop, ...
@@ -787,7 +786,7 @@ text(rfit,   use.n=TRUE, all= T, cex=0.8)
 
 str(storm3)
 #storm3 <- storm[,-c(4,5, 8, 9, 14, 15)]
-str(storm3)
+storm3$EVTYPE[6]
 cfit = rpart(EVTYPE~., data=storm3, method = "class")
 par(mfrow = c(3, 1), mar = c(11.5, 5, 4, 2), las = 1, cex = 0.9, cex.main = 1.4, cex.lab = 1.2)
 plot(as.party(cfit), 
