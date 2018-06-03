@@ -17,7 +17,7 @@ getwd()
 packages <- c("R.utils", "data.table", "downloader", "lubridate", "plyr","dplyr",
               "rstudioapi","randomForest","tree","party","tidyr","broom","datasets",
               "ggplot2","tabplot","PerformanceAnalytics","coefplot","RColorBrewer",
-              "data.table","igraph", "rpart","bnlearn","lattice","party", 
+              "data.table","igraph", "rpart","bnlearn","lattice", 
               "grid","partykit","deal","fiftystater","plotly","googleVis")
 
 ipak <- function(pkg){
@@ -338,9 +338,7 @@ saveRDS(x, file = "Cleandata.rda")
 # we did Random forest, barplot, variable importance plot
 # we defined 5 research question and the answers are provided below questions
 
-
 storm=readRDS('Cleandata.Rda')
-
 
 #--------- adding total Morbimortality to data columns
 str(storm)
@@ -388,7 +386,6 @@ colnames(morbimortality.event)[4] = "Total"
 morbimortality.event.sorted <- morbimortality.event[order(-morbimortality.event$Total, na.last=TRUE), ]
 head(morbimortality.event.sorted)
 
-
 # barplot of Fatalities and Injuries by event type
 nr = 15 # just show 15 top values
 par(mfrow = c(3, 1), mar = c(11.5, 5, 4, 2), las = 3, cex = 0.5, cex.main = 1.4, cex.lab = 1.2)
@@ -407,8 +404,6 @@ ggplot(Fat, aes(x=Event, y=Fatalities, fill=Event))+
   theme(axis.text.x = element_text(angle = 90, hjust = 1))+
   theme(plot.title = element_text(hjust = 0.5))
 
-
-
 Inj<-injuries.event.sorted[1:nr,]
 Inj$Event <- factor(Inj$Event, levels = Inj$Event[order(-Inj$Injuries)])
 
@@ -421,7 +416,6 @@ ggplot(Inj, aes(x=Event, y=Injuries, fill=Event))+
   theme(axis.text.x = element_text(angle = 90, hjust = 1))+
   theme(plot.title = element_text(hjust = 0.5))
 
-
 Mor<-morbimortality.event.sorted[1:nr,]
 Mor$Event <- factor(Mor$Event, levels = Mor$Event[order(-Mor$Total)])
 
@@ -433,8 +427,6 @@ ggplot(Mor, aes(x=Event, y=Total, fill=Event))+
   theme_bw()+
   theme(axis.text.x = element_text(angle = 90, hjust = 1))+
   theme(plot.title = element_text(hjust = 0.5))
-
-
 
 #** (2) Across the United States, which year was the most harmful year regarding the number of Fatalities and Injuries?--------
 #   we can answer this question by sorting fatalities and injuries in decreasing manner for each year
@@ -804,13 +796,15 @@ plot(as.party(cfit),
 
 ######### Bayesian Analysis ########################
 #install.packages("bnlearn")
-#install.packages("lattice")
 library(data.table)
 library(lattice)
 #library(bnlearn)
 library(igraph)
 library(bnlearn)
-#library(network)
+library(network)
+library(deal)
+library(RColorBrewer)
+library(PerformanceAnalytics)
 #** DMG_t --------
 str(storm1)
 #learning a bayesian network from continues data
@@ -818,14 +812,23 @@ bnhc <- hc(storm1, score="bic-g")# based on gausian
 bnhc
 bnhc$nodes
 bnhc$arcs
-
+str(colnames(storm1))
 edges=arcs(bnhc)
 nodes=nodes(bnhc)
+
+#cols = colorRampPalette(brewer.pal(11, "Spectral"))(length(colnames(storm1)))
 net <- graph.data.frame(edges,directed=T,vertices=nodes)
-par(mfrow = c(1, 1), mar = c(11.5, 5, 4, 2), las = 3, cex = 0.8, cex.main = 1.4, cex.lab = 1.2)
-plot(net,vertex.label=V(net)$name,vertex.size=40,
-     edge.arrow.size=0.3,vertex.color="cyan",
+#txt <- toString(colnames(storm1), Width = " ")
+#str(txt)
+#nchar(V(net)$name[2])
+#str(V(net)[1])
+par(mfrow = c(1, 1), mar = c(4, 0.1, 4, 0.1), las = 3, cex = 0.8, cex.main = 1.4, cex.lab = 1.2)
+plot(net,vertex.label=V(net)$name,vertex.size=(8*nchar(V(net)$name)),
+     main="Bayesian Network Plot",
+     #xlab=colnames(storm1),
+     edge.arrow.size=0.3,vertex.color=colorRampPalette(brewer.pal(11, "Spectral"))(length(colnames(storm1))),
      edge.color="black")
+text(0, -1.5, toString(colnames(storm1), Width = " "), cex = .8, font=2)
 
 chart.Correlation(marks,pch=21,histogram=TRUE)
 
@@ -852,17 +855,6 @@ library(deal)
 str(storm3)
 storm4 = storm3_s [,c(2,3,4,5,6,8,9,10,11,12,13,14)] # we removed year and crop_dmg because these columns caused Beysian analysis to become ill-conditioned because of two many repetitious values and zeros
 str(storm4)
-# dim(storm)
-# storm4 = storm[,-c(4, 5, 8, 9, 13, 14)]
-# str(storm4)
-# levels(storm4$EVTYPE)
-# levels(storm4$STATE)
-# storm4 = na.omit(storm4)
-# str(storm4)
-# storm4$STATE <- factor(storm4$STATE)
-# storm4$EVTYPE <- factor(storm4$EVTYPE)
-# levels(storm4$EVTYPE)
-# levels(storm4$STATE)
 
 storm3.nw <- network(storm4)          
 storm3.prior <- jointprior(storm3.nw) # make joint prior distribution
