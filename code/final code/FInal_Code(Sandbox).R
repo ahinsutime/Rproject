@@ -210,6 +210,7 @@ dim(final_storm)
 x<-na.exclude(final_storm)
 dim(x)
 save(x, file = "Cleandata.rda")
+x <- storm
 ###############################################################################################
 #################################################
 #################################################
@@ -264,6 +265,8 @@ p3 <- ggplot(x_f, aes(x = reorder_size(x_f$EVTYPE))) +
   geom_bar() +
   xlab("Event Type") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+
 #3. create Multiple plot function
 # ggplot objects can be passed in ..., or to plotlist (as a list of ggplot objects)
 # - cols:   Number of columns in layout
@@ -327,7 +330,7 @@ chart.Correlation(x_n)
 # we defined 5 research question and the answers are provided below questions
 
 storm=readRDS('Cleandata.Rda')
-set.seed(123)
+#set.seed(123)
 
 #--------- adding total Morbimortality to data columns
 str(storm)
@@ -642,6 +645,8 @@ varImpPlot(rf2, scale=T, main = "Variable Importance Plot for Estimating Morbimo
 # distinguish what are the real variables influencing the prediction of total damage
 # we also remove factors to run random forest
 
+
+
 storm3 = storm[,c(-1,-10,-17)]
 storm3_s = storm_sample[,c(-1, -10, -17)]
 
@@ -916,8 +921,8 @@ ggplot(AvgMor, aes(x=Event, y=AvgMorbimortal, fill=Event))+
 
 ## Regarding RQ2, it may worth to plot variables by year, year in increasing order. 
 Fatyinc<-fatalities.year
-ggplot(Fatyinc, aes(x=factor(Year), y=Fatalities))+
-  geom_bar(stat="identity", fill="red")+
+ggplot(Fatyinc, aes(x=factor(Year), y=Fatalities, fill= Year))+
+  geom_bar(stat="identity")+
   xlab("Year")+
   ylab("Fatalities")+
   ggtitle("Fatalities vs Year")+
@@ -927,8 +932,8 @@ ggplot(Fatyinc, aes(x=factor(Year), y=Fatalities))+
   geom_text(aes(label=Fatalities), vjust=-0.5, color="black", size=2.5)
 
 Injyinc<-injuries.year
-ggplot(Injyinc, aes(x=factor(Year), y=Injuries))+
-  geom_bar(stat="identity", fill="#f9f906")+
+ggplot(Injyinc, aes(x=factor(Year), y=Injuries, fill=Year))+
+  geom_bar(stat="identity")+
   xlab("Year")+
   ylab("Injuries")+
   ggtitle("Injuries vs Year")+
@@ -958,12 +963,33 @@ ggplot(Moryinc, aes(x=factor(Year), y=Total))+
 # dep: "FATALITIES" "INJURIES" "PROPDMG_t" "CROPDMG_t" "DMG_t" "MORBI_t"
 
 # indep to use - year, evtype, latitude, longitude, rgdp, pop, pcp
+set.seed(456)
+storm_sample = storm[sample(nrow(storm),0.01*nrow(storm)),] # small sample data to do randonforest 
+
+storm1 = as.data.frame(storm[,-c(1, 3, 8, 9, 17)]) # We removed EVTYPE, PROPDMG_t, CROPDMG_t
+storm1_s = storm_sample[,-c(1, 3, 8, 9, 17)] 
+
+storm2 <- storm[,-c(1,3, 4, 5, 10)]
+storm2_s <-  storm_sample[,-c(1,3, 4, 5, 10)]
+storm3 = storm[,c(-1,-10,-17)]
+storm3_s = storm_sample[,c(-1, -10, -17)]
+
+table(factor(storm3$EVTYPE))
+levels(storm3$EVTYPE)
+storm3$EVTYPE <- factor(storm3$EVTYPE);
+table(factor(storm3$EVTYPE))
+
+table(factor(storm3_s$EVTYPE))
+levels(storm3_s$EVTYPE)
+storm3_s$EVTYPE <- factor(storm3_s$EVTYPE);
+table(factor(storm3$EVTYPE))
+
+
 storm_ext=storm
 storm_ext$rgdppc=storm$rgdp/storm$pop # extend dataset to include real gdp per capita. 
 
-
-# Total damage
-storm_rfDMG=storm_ext[,c("LATITUDE","LONGITUDE","rgdppc","tavg","tmax","tmin","pop","pcp","EVTYPE","DMG_t")]
+# Total damage #
+storm_rfDMG=storm_ext[,c("LATITUDE","LONGITUDE","rgdppc","tavg","pop","pcp","EVTYPE","DMG_t")]
 storm_rfDMG_sample = storm_rfDMG[sample(nrow(storm_rfDMG),0.01*nrow(storm_rfDMG)),] # small sample data to do randonforest 
 
 rf = randomForest(DMG_t~., data=storm_rfDMG_sample, importance =T,  na.action=na.omit)  
@@ -1002,7 +1028,7 @@ varImpPlot(rf2, scale=T, main = "Variable Importance Plot for Estimating Total D
 
 
 ## Total morbimortality
-storm_rfMORBI=storm_ext[,c("LATITUDE","LONGITUDE","rgdppc","tavg","tmax","tmin","pop","pcp","EVTYPE","MORBI_t")]
+storm_rfMORBI=storm_ext[,c("LATITUDE","LONGITUDE","rgdppc","tavg","pop","pcp","EVTYPE","MORBI_t")]
 storm_rfMORBI_sample = storm_rfMORBI[sample(nrow(storm_rfMORBI),0.01*nrow(storm_rfMORBI)),] # small sample data to do randonforest 
 
 rf = randomForest(MORBI_t~., data=storm_rfMORBI_sample, importance =T,  na.action=na.omit)  # remove factors to run random forest
@@ -1045,3 +1071,89 @@ rfit = rpart(MORBI_t~., data=storm_rfMORBI, method="anova", control = rpart.cont
 par(mfrow = c(1, 1), mar = c(0.1, 0.1, 3, 0.1), las = 1, cex = 1, cex.main = 1.4, cex.lab = 1.2)
 plot(rfit, uniform=T, main="Recursive Partitioning Tree on Morbimortality", margin=0.2)
 text(rfit,   use.n=TRUE, all= T, cex=0.8)
+
+
+
+install.packages("bnlearn") #Don't comment out this line!!!!!! You must execute this line to get bayes net working.
+library(bnlearn)
+library(data.table)
+library(RColorBrewer)
+set.seed(1234)
+storm_sample = storm[sample(nrow(storm),0.02*nrow(storm)),] # small sample data to do randonforest 
+
+storm1 = as.data.frame(storm[,-c(1, 3, 8, 9, 17)]) # We removed EVTYPE, PROPDMG_t, CROPDMG_t
+storm1_s = storm_sample[,-c(1, 3, 8, 9, 17)] 
+
+storm2 <- storm[,-c(1,3, 4, 5, 10)]
+storm2_s <-  storm_sample[,-c(1,3, 4, 5, 10)]
+storm3 = storm[,c(-1,-10,-17)]
+storm3_s = storm_sample[,c(-1, -10, -17)]
+
+table(factor(storm3$EVTYPE))
+levels(storm3$EVTYPE)
+storm3$EVTYPE <- factor(storm3$EVTYPE);
+table(factor(storm3$EVTYPE))
+
+table(factor(storm3_s$EVTYPE))
+levels(storm3_s$EVTYPE)
+storm3_s$EVTYPE <- factor(storm3_s$EVTYPE);
+table(factor(storm3$EVTYPE))
+
+
+storm_ext=storm
+storm_ext$rgdppc=storm$rgdp/storm$pop # extend dataset to include real gdp per capita. 
+
+# Total damage #
+storm_rfDMG=storm_ext[,c("LATITUDE","LONGITUDE","rgdppc","tavg","pop","pcp","EVTYPE","DMG_t")]
+storm_rfDMG_sample = storm_rfDMG[sample(nrow(storm_rfDMG),0.02*nrow(storm_rfDMG)),] # small sample data to do randonforest 
+
+
+#** DMG_t --------
+str(storm_rfDMG)
+#learning a bayesian network from continues data
+bnhc <- hc(storm_rfDMG[,-7], score="bic-g")# based on gausian 
+edges=arcs(bnhc)
+nodes=nodes(bnhc)
+library(igraph)
+net <- graph.data.frame(edges,directed=T,vertices=nodes)
+par(mfrow = c(1, 1), mar = c(4, 0.1, 4, 0.1), las = 3, cex = 0.8, cex.main = 1.4, cex.lab = 1.2)
+plot(net,vertex.label=V(net)$name,vertex.size=(3*nchar(V(net)$name)),
+     main="Bayesian Network Plot on Total Damage",
+     edge.arrow.size=0.3,vertex.color=colorRampPalette(brewer.pal(11, "Spectral"))(length(colnames(storm1))),
+     edge.color="black")
+text(0, -1.5, toString(colnames(storm1), Width = " "), cex = .8, font=2)
+
+chart.Correlation(storm1,pch=21,histogram=TRUE)
+
+#** MORBI_t --------------
+str(storm2)
+storm2 <- na.omit(storm2)
+#learning a beysian network from continues data
+bnhc <- hc(storm2, score="bic-g")# based on gausian 
+
+edges=arcs(bnhc)
+nodes=nodes(bnhc)
+net <- graph.data.frame(edges,directed=T,vertices=nodes)
+plot(net,vertex.label=V(net)$name,vertex.size=(3*nchar(V(net)$name)),
+     main="Bayesian Network Plot on Morbimortalities",
+     edge.arrow.size=0.3,vertex.color=colorRampPalette(brewer.pal(11, "Spectral"))(length(colnames(storm2))),
+     edge.color="black")
+text(0, -1.5, toString(colnames(storm2), Width = " "), cex = .8, font=2)
+
+chart.Correlation(storm2,pch=21,histogram=TRUE)
+
+#** EVTYPE
+
+storm4 = storm3_s [,c(2,3,4,5,6,8,9,10,11,12,13,14)] # we removed year and crop_dmg because these columns caused Beysian analysis to become ill-conditioned because of two many repetitious values and zeros
+storm3.nw <- network(storm4)          
+storm3.prior <- jointprior(storm3.nw) # make joint prior distribution
+# learn estimate parameters
+storm3.nw <- learn(storm3.nw,storm4,storm3.prior)$nw
+
+result <- heuristic(initnw=storm3.nw, data=storm4, prior=storm3.prior,
+                    restart=2, degree=10, trace=FALSE)
+par(mfrow = c(1, 1), mar = c(11.5, 5, 4, 2), las = 3, cex = 0.8, cex.main = 1.4, cex.lab = 0.2)
+plot(getnetwork(result),
+     main="Bayesian Network Plot on Event Type")
+text(170, -50, toString(colnames(storm4), Width = " "), cex = .8, font=2)
+
