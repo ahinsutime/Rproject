@@ -839,7 +839,7 @@ bnhc$arcs
 edges=arcs(bnhc)
 nodes=nodes(bnhc)
 net <- graph.data.frame(edges,directed=T,vertices=nodes)
-plot(net,vertex.label=V(net)$name,vertex.size=(8*nchar(V(net)$name)),
+plot(net,vertex.label=V(net)$name,vertex.size=(5*nchar(V(net)$name)),
      main="Bayesian Network Plot on Morbimortalities",
      #xlab=colnames(storm1),
      edge.arrow.size=0.3,vertex.color=colorRampPalette(brewer.pal(11, "Spectral"))(length(colnames(storm2))),
