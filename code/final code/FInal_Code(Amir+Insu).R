@@ -370,21 +370,35 @@ colnames(fatalities.event) <- c("Event", "Fatalities")
 fatalities.event.sorted <- fatalities.event[order(-fatalities.event$Fatalities, na.last=TRUE), ]
 head(fatalities.event.sorted)
 
+# Average fatalities by event type
+avgfatalities.event <- aggregate(storm$FATALITIES, by = list(storm$EVTYPE), FUN = mean)
+colnames(avgfatalities.event) <- c("Event", "AvgFatalities")
+avgfatalities.event.sorted <- avgfatalities.event[order(-avgfatalities.event$AvgFatalities, na.last=TRUE), ]
+head(avgfatalities.event.sorted)
+
 # Aggregate Injuries by event type
 injuries.event <- aggregate(storm$INJURIES, by = list(storm$EVTYPE), FUN = sum)
 colnames(injuries.event) <- c("Event", "Injuries")
 injuries.event.sorted <- injuries.event[order(-injuries.event$Injuries, na.last=TRUE), ]
 head(injuries.event.sorted)
 
+# Average Injuries by event type
+avginjuries.event <- aggregate(storm$INJURIES, by = list(storm$EVTYPE), FUN = mean)
+colnames(avginjuries.event) <- c("Event", "AvgInjuries")
+avginjuries.event.sorted <- avginjuries.event[order(-avginjuries.event$AvgInjuries, na.last=TRUE), ]
+head(avginjuries.event.sorted)
+
 # Combine Injuries and Fatalities 
 morbimortality.event <- data.frame(cbind(fatalities.event, injuries.event))[,-3]
-
 str(morbimortality.event)
 morbimortality.event$Total <- as.data.table( morbimortality.event$Fatalities + morbimortality.event$Injuries )
 morbimortality.event$Total <- apply( morbimortality.event[,2:3],1,sum )
 colnames(morbimortality.event)[4] = "Total"
 morbimortality.event.sorted <- morbimortality.event[order(-morbimortality.event$Total, na.last=TRUE), ]
 head(morbimortality.event.sorted)
+
+# Combine Injuries and Fatalities per each event 
+morbimortality=storm$FATALITIES+storm$INJURIES
 
 # barplot of Fatalities and Injuries by event type
 nr = 15 # just show 15 top values
@@ -404,6 +418,18 @@ ggplot(Fat, aes(x=Event, y=Fatalities, fill=Event))+
   theme(axis.text.x = element_text(angle = 90, hjust = 1))+
   theme(plot.title = element_text(hjust = 0.5))
 
+AvgFat<-avgfatalities.event.sorted[1:nr,]
+AvgFat$Event <- factor(AvgFat$Event, levels = AvgFat$Event[order(-AvgFat$AvgFatalities)])
+
+ggplot(AvgFat, aes(x=Event, y=AvgFatalities, fill=Event))+
+  geom_bar(stat="identity", position="dodge")+
+  xlab("Event")+
+  ylab("Avg. Fatalities")+
+  ggtitle("Avg. Fatalities vs Event")+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))+
+  theme(plot.title = element_text(hjust = 0.5))
+
 Inj<-injuries.event.sorted[1:nr,]
 Inj$Event <- factor(Inj$Event, levels = Inj$Event[order(-Inj$Injuries)])
 
@@ -412,6 +438,18 @@ ggplot(Inj, aes(x=Event, y=Injuries, fill=Event))+
   xlab("Event")+
   ylab("Injuries")+
   ggtitle("Injuries vs Event")+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))+
+  theme(plot.title = element_text(hjust = 0.5))
+
+AvgInj<-avginjuries.event.sorted[1:nr,]
+AvgInj$Event <- factor(AvgInj$Event, levels = AvgInj$Event[order(-AvgInj$AvgInjuries)])
+
+ggplot(AvgInj, aes(x=Event, y=AvgInjuries, fill=Event))+
+  geom_bar(stat="identity", position="dodge")+
+  xlab("Event")+
+  ylab("Avg. Injuries")+
+  ggtitle("Avg. Injuries vs Event")+
   theme_bw()+
   theme(axis.text.x = element_text(angle = 90, hjust = 1))+
   theme(plot.title = element_text(hjust = 0.5))
@@ -818,7 +856,7 @@ nodes=nodes(bnhc)
 #cols = colorRampPalette(brewer.pal(11, "Spectral"))(length(colnames(storm1)))
 net <- graph.data.frame(edges,directed=T,vertices=nodes)
 par(mfrow = c(1, 1), mar = c(4, 0.1, 4, 0.1), las = 3, cex = 0.8, cex.main = 1.4, cex.lab = 1.2)
-plot(net,vertex.label=V(net)$name,vertex.size=(8*nchar(V(net)$name)),
+plot(net,vertex.label=V(net)$name,vertex.size=(3*nchar(V(net)$name)),
      main="Bayesian Network Plot on Total Damage",
      #xlab=colnames(storm1),
      edge.arrow.size=0.3,vertex.color=colorRampPalette(brewer.pal(11, "Spectral"))(length(colnames(storm1))),
@@ -839,7 +877,7 @@ bnhc$arcs
 edges=arcs(bnhc)
 nodes=nodes(bnhc)
 net <- graph.data.frame(edges,directed=T,vertices=nodes)
-plot(net,vertex.label=V(net)$name,vertex.size=(5*nchar(V(net)$name)),
+plot(net,vertex.label=V(net)$name,vertex.size=(3*nchar(V(net)$name)),
      main="Bayesian Network Plot on Morbimortalities",
      #xlab=colnames(storm1),
      edge.arrow.size=0.3,vertex.color=colorRampPalette(brewer.pal(11, "Spectral"))(length(colnames(storm2))),
@@ -924,6 +962,7 @@ MapPROPDMG_t <- gvisGeoChart(storm_m.state, "STATENAME", "PROPDMG_t",
                              options=list(region="US", 
                                           displayMode="regions", 
                                           resolution="provinces",
+                                          colors="red"
                                           width=600, height=400))
 g=plot(MapPROPDMG_t)
 print(MapPROPDMG_t,file="required_map_plots/MapPROPDMG_t.html")
@@ -935,6 +974,7 @@ MapCROPDMG_t <- gvisGeoChart(storm_m.state, "STATENAME", "CROPDMG_t",
                              options=list(region="US", 
                                           displayMode="regions", 
                                           resolution="provinces",
+                                          colors="yellow",
                                           width=600, height=400))
 g=plot(MapCROPDMG_t)
 print(MapCROPDMG_t,file="required_map_plots/MapCROPDMG_t.html")
@@ -946,6 +986,7 @@ MapDMG_t <- gvisGeoChart(storm_m.state, "STATENAME", "DMG_t",
                          options=list(region="US", 
                                       displayMode="regions", 
                                       resolution="provinces",
+                                      colors="orange",
                                       width=600, height=400))
 g=plot(MapDMG_t)
 print(MapDMG_t,file="required_map_plots/MapDMG_t.html")
