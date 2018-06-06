@@ -1,25 +1,16 @@
 ####################################
 rm(list=ls())
 dev.off()
-# set directory
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 curdir=dirname(rstudioapi::getActiveDocumentContext()$path)
-datadir <- curdir
-setwd(datadir)
-getwd()
-#install.packages("githubinstall")
-#library(githubinstall)
-#githubinstall("https://github.com/awesomedata/awesome-public-datasets")
 ############1.Preparing data###################
 #**(1)Install and load packages----------------
 #install & load
 #if you have already installed the packages only run line 12 and skip up to line 20
 packages <- c("R.utils", "data.table", "downloader", "lubridate", "plyr","dplyr",
               "rstudioapi","randomForest","tree","party","tidyr","broom","datasets",
-              "ggplot2","tabplot","PerformanceAnalytics","coefplot","RColorBrewer",
-              "data.table","igraph", "rpart","bnlearn","lattice", 
-              "grid","partykit","deal","fiftystater","plotly","googleVis")
-
+              "ggplot2","tabplot","PerformanceAnalytics","coefplot", "lattice", "deal",
+              "network", "igraph", "RColorBrewer", "reshape2", "googleVis")
 ipak <- function(pkg){
   new.pkg <- pkg[!(pkg %in% installed.packages()[, "Package"])]
   if (length(new.pkg)) 
@@ -219,116 +210,117 @@ str(final_storm)
 dim(final_storm)
 x<-na.exclude(final_storm)
 dim(x)
-saveRDS(x, file = "Cleandata.rda")
+save(x, file = "Cleandata.rda")
+x <- storm
 ###############################################################################################
 #################################################
 #################################################
-# #3.Basic statistic analysis##########
-# #split data in factor variable and continuos
-# x_f <- x[,c(1:3)]
-# x_n <- x[,-c(1:3)]
-# #**(1)summary table of numeric variables--------
-# sumstat <- x_n %>%
-#   # Select and rename five variables 
-#   select("Number of people Killed"= FATALITIES,
-#          "Number of people Injured"=INJURIES,
-#          "Latitude where the storm event began"= LATITUDE,
-#          "Longitude where the storm event began"= LONGITUDE,
-#          "Property Damage"= PROPDMG_t,
-#          "Crop Damage"= CROPDMG_t,
-#          "Total damage sum"= DMG_t,
-#          "Real GDP"=rgdp,
-#          "Population"=pop,
-#          "Average Year Temperature"=tavg,
-#          "Maxmimun Year Temperature"=tmax,
-#          "Minimum Year Temperature"=tmin,
-#          "Year Precipitation"=pcp) %>%
-#   # Find the mean, st. dev., min, and max for each variable 
-#   summarise_all(funs(mean, sd, min, max)) %>%
-#   # Move summary stats to columns
-#   gather(key, value, everything()) %>% 
-#   separate(key, into = c("variable", "stat"), sep = "_") %>%
-#   spread(stat, value) %>%
-#   # Set order of summary statistics 
-#   select(variable, mean, sd, min, max) %>%
-#   # Round all numeric variables to one decimal point
-#   mutate_at(.funs=funs(round(., 1)),.vars = c("mean","sd","min","max"))
-# sumstat
-# #**(2)table plot----------
-# tableplot(x_f)
-# #**(3)Barplot of factor variables--------
-# #1.create ordering function
-# reorder_size <- function(x) {
-#   factor(x, levels = names(sort(table(x), decreasing = TRUE)))
-# }
-# #2. barplot each factors using ordering function
-# p1 <- ggplot(x_f, aes(x = reorder_size(x_f$STATE))) +
-#   geom_bar() +
-#   xlab("State or Province") +
-#   theme(axis.text.x = element_text(angle = 45, hjust = 1))
-# p2<- ggplot(x_f, aes(x = x_f$YEAR)) +
-#   geom_bar() +
-#   xlab("YEAR") +
-#   theme(axis.text.x = element_text(angle = 45, hjust = 1))
-# p3 <- ggplot(x_f, aes(x = reorder_size(x_f$EVTYPE))) +
-#   geom_bar() +
-#   xlab("Event Type") +
-#   theme(axis.text.x = element_text(angle = 45, hjust = 1))
-# #3. create Multiple plot function
-# # ggplot objects can be passed in ..., or to plotlist (as a list of ggplot objects)
-# # - cols:   Number of columns in layout
-# # - layout: A matrix specifying the layout. If present, 'cols' is ignored.
-# # If the layout is something like matrix(c(1,2,3,3), nrow=2, byrow=TRUE),
-# # then plot 1 will go in the upper left, 2 will go in the upper right, and
-# # 3 will go all the way across the bottom.
-# #4. Plot multiplot
-# multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
-#   library(grid)
-#   # Make a list from the ... arguments and plotlist
-#   plots <- c(list(...), plotlist)
-#   numPlots = length(plots)
-#   # If layout is NULL, then use 'cols' to determine layout
-#   if (is.null(layout)) {
-#     # Make the panel
-#     # ncol: Number of columns of plots
-#     # nrow: Number of rows needed, calculated from # of cols
-#     layout <- matrix(seq(1, cols * ceiling(numPlots/cols)),
-#                      ncol = cols, nrow = ceiling(numPlots/cols))
-#   }
-#   if (numPlots==1) {
-#     print(plots[[1]])
-#   } else {
-#     # Set up the page
-#     grid.newpage()
-#     pushViewport(viewport(layout = grid.layout(nrow(layout), ncol(layout))))
-#     # Make each plot, in the correct location
-#     for (i in 1:numPlots) {
-#       # Get the i,j matrix positions of the regions that contain this subplot
-#       matchidx <- as.data.frame(which(layout == i, arr.ind = TRUE))
-#       print(plots[[i]], vp = viewport(layout.pos.row = matchidx$row,
-#                                       layout.pos.col = matchidx$col))
-#     }
-#   }
-# }
-# multiplot(p1, p3, p2, cols=1)
-# #**(4)Which ??????
-# bx_x=x
-# bx_x$STATE <- as.character(x$STATE)
-# bx_x<-subset(bx_x, subset = STATE %in% c("TX","KS","IA","AL","MO"))
-# bx_x$STATE <- as.factor(bx_x$STATE)
-# str(bx_x)
-# str(bx_x)
-# bx_x<-filter(x, STATE== "")
-# ggplot(data = bx_x, 
-#        aes(x=STATE, y=FATALITIES)) + 
-#   geom_boxplot() + 
-#   facet_wrap(~YEAR,ncol = 8)
-# #**(5)Linear regression----------
-# chart.Correlation(x_n)
-# 
-# #Clustering
-# 
+#3.Basic statistic analysis##########
+#split data in factor variable and continuos
+x_f <- x[,c(1:3)]
+x_n <- x[,-c(1:3)]
+#**(1)summary table of numeric variables--------
+sumstat <- x_n %>%
+  # Select and rename five variables 
+  select("Number of people Killed"= FATALITIES,
+         "Number of people Injured"=INJURIES,
+         "Latitude where the storm event began"= LATITUDE,
+         "Longitude where the storm event began"= LONGITUDE,
+         "Property Damage"= PROPDMG_t,
+         "Crop Damage"= CROPDMG_t,
+         "Total damage sum"= DMG_t,
+         "Real GDP"=rgdp,
+         "Population"=pop,
+         "Average Year Temperature"=tavg,
+         "Maxmimun Year Temperature"=tmax,
+         "Minimum Year Temperature"=tmin,
+         "Year Precipitation"=pcp) %>%
+  # Find the mean, st. dev., min, and max for each variable 
+  summarise_all(funs(mean, sd, min, max)) %>%
+  # Move summary stats to columns
+  gather(key, value, everything()) %>% 
+  separate(key, into = c("variable", "stat"), sep = "_") %>%
+  spread(stat, value) %>%
+  # Set order of summary statistics 
+  select(variable, mean, sd, min, max) %>%
+  # Round all numeric variables to one decimal point
+  mutate_at(.funs=funs(round(., 1)),.vars = c("mean","sd","min","max"))
+sumstat
+#**(2)table plot----------
+tableplot(x_f)
+#**(3)Barplot of factor variables--------
+#1.create ordering function
+reorder_size <- function(x) {
+  factor(x, levels = names(sort(table(x), decreasing = TRUE)))
+}
+#2. barplot each factors using ordering function
+p1 <- ggplot(x_f, aes(x = reorder_size(x_f$STATE))) +
+  geom_bar() +
+  xlab("State or Province") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+p2<- ggplot(x_f, aes(x = x_f$YEAR)) +
+  geom_bar() +
+  xlab("YEAR") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+p3 <- ggplot(x_f, aes(x = reorder_size(x_f$EVTYPE))) +
+  geom_bar() +
+  xlab("Event Type") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
+
+#3. create Multiple plot function
+# ggplot objects can be passed in ..., or to plotlist (as a list of ggplot objects)
+# - cols:   Number of columns in layout
+# - layout: A matrix specifying the layout. If present, 'cols' is ignored.
+# If the layout is something like matrix(c(1,2,3,3), nrow=2, byrow=TRUE),
+# then plot 1 will go in the upper left, 2 will go in the upper right, and
+# 3 will go all the way across the bottom.
+#4. Plot multiplot
+multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
+  library(grid)
+  # Make a list from the ... arguments and plotlist
+  plots <- c(list(...), plotlist)
+  numPlots = length(plots)
+  # If layout is NULL, then use 'cols' to determine layout
+  if (is.null(layout)) {
+    # Make the panel
+    # ncol: Number of columns of plots
+    # nrow: Number of rows needed, calculated from # of cols
+    layout <- matrix(seq(1, cols * ceiling(numPlots/cols)),
+                     ncol = cols, nrow = ceiling(numPlots/cols))
+  }
+  if (numPlots==1) {
+    print(plots[[1]])
+  } else {
+    # Set up the page
+    grid.newpage()
+    pushViewport(viewport(layout = grid.layout(nrow(layout), ncol(layout))))
+    # Make each plot, in the correct location
+    for (i in 1:numPlots) {
+      # Get the i,j matrix positions of the regions that contain this subplot
+      matchidx <- as.data.frame(which(layout == i, arr.ind = TRUE))
+      print(plots[[i]], vp = viewport(layout.pos.row = matchidx$row,
+                                      layout.pos.col = matchidx$col))
+    }
+  }
+}
+multiplot(p1, p3, p2, cols=1)
+#**(4)Which ??????
+bx_x=x
+bx_x$STATE <- as.character(x$STATE)
+bx_x<-subset(bx_x, subset = STATE %in% c("TX","KS","IA","AL","MO"))
+bx_x$STATE <- as.factor(bx_x$STATE)
+str(bx_x)
+str(bx_x)
+bx_x<-filter(x, STATE== "")
+ggplot(data = bx_x, 
+       aes(x=STATE, y=FATALITIES)) + 
+  geom_boxplot() + 
+  facet_wrap(~YEAR,ncol = 8)
+#**(5)Linear regression----------
+chart.Correlation(x_n)
+
+#Clustering
 
 
 ##############################start the code from here #######################
@@ -338,7 +330,8 @@ saveRDS(x, file = "Cleandata.rda")
 # we did Random forest, barplot, variable importance plot
 # we defined 5 research question and the answers are provided below questions
 
-storm=readRDS('Cleandata.Rda')
+storm=readRDS('Cleandata_ecomate.rda')
+#set.seed(123)
 
 #--------- adding total Morbimortality to data columns
 str(storm)
@@ -361,7 +354,6 @@ str(storm)
 #  we can answer this question by sorting fatalities and injuries in decreasing manner for each type of event
 #** Answer: TORNADO caused most number of fatalities, WIND caused most number of INJURIES and TOTAL (FATALITIES+INJURIES) 
 
-
 #**  Estimating total fatalities and injuries per event type ----
 
 # Aggregate Fatalities by event type
@@ -370,23 +362,11 @@ colnames(fatalities.event) <- c("Event", "Fatalities")
 fatalities.event.sorted <- fatalities.event[order(-fatalities.event$Fatalities, na.last=TRUE), ]
 head(fatalities.event.sorted)
 
-# Average fatalities by event type
-avgfatalities.event <- aggregate(storm$FATALITIES, by = list(storm$EVTYPE), FUN = mean)
-colnames(avgfatalities.event) <- c("Event", "AvgFatalities")
-avgfatalities.event.sorted <- avgfatalities.event[order(-avgfatalities.event$AvgFatalities, na.last=TRUE), ]
-head(avgfatalities.event.sorted)
-
 # Aggregate Injuries by event type
 injuries.event <- aggregate(storm$INJURIES, by = list(storm$EVTYPE), FUN = sum)
 colnames(injuries.event) <- c("Event", "Injuries")
 injuries.event.sorted <- injuries.event[order(-injuries.event$Injuries, na.last=TRUE), ]
 head(injuries.event.sorted)
-
-# Average Injuries by event type
-avginjuries.event <- aggregate(storm$INJURIES, by = list(storm$EVTYPE), FUN = mean)
-colnames(avginjuries.event) <- c("Event", "AvgInjuries")
-avginjuries.event.sorted <- avginjuries.event[order(-avginjuries.event$AvgInjuries, na.last=TRUE), ]
-head(avginjuries.event.sorted)
 
 # Combine Injuries and Fatalities 
 morbimortality.event <- data.frame(cbind(fatalities.event, injuries.event))[,-3]
@@ -397,15 +377,10 @@ colnames(morbimortality.event)[4] = "Total"
 morbimortality.event.sorted <- morbimortality.event[order(-morbimortality.event$Total, na.last=TRUE), ]
 head(morbimortality.event.sorted)
 
-# Combine Injuries and Fatalities per each event 
-morbimortality=storm$FATALITIES+storm$INJURIES
-
 # barplot of Fatalities and Injuries by event type
 nr = 15 # just show 15 top values
 par(mfrow = c(3, 1), mar = c(11.5, 5, 4, 2), las = 3, cex = 0.5, cex.main = 1.4, cex.lab = 1.2)
-#with(fatalities.event.sorted[1:nr,], barplot(Fatalities, names.arg = fatalities.event.sorted$Event[1:nr], col = "red", ylab = "Fatalities", main = "Fatalities - Event"))
-#with(injuries.event.sorted[1:nr,], barplot(Injuries, names.arg = injuries.event.sorted$Event[1:nr], col = "green", ylab = "Injuries", main = "Injuries - Event"))
-#with(morbimortality.event.sorted[1:nr,], barplot(Total, names.arg = injuries.event.sorted$Event[1:nr], col = "blue", ylab = "Total", main = "Total (Fatalities + Injuries) - Event"))
+
 Fat<-fatalities.event.sorted[1:nr,]
 Fat$Event <- factor(Fat$Event, levels = Fat$Event[order(-Fat$Fatalities)])
 
@@ -418,18 +393,6 @@ ggplot(Fat, aes(x=Event, y=Fatalities, fill=Event))+
   theme(axis.text.x = element_text(angle = 90, hjust = 1))+
   theme(plot.title = element_text(hjust = 0.5))
 
-AvgFat<-avgfatalities.event.sorted[1:nr,]
-AvgFat$Event <- factor(AvgFat$Event, levels = AvgFat$Event[order(-AvgFat$AvgFatalities)])
-
-ggplot(AvgFat, aes(x=Event, y=AvgFatalities, fill=Event))+
-  geom_bar(stat="identity", position="dodge")+
-  xlab("Event")+
-  ylab("Avg. Fatalities")+
-  ggtitle("Avg. Fatalities vs Event")+
-  theme_bw()+
-  theme(axis.text.x = element_text(angle = 90, hjust = 1))+
-  theme(plot.title = element_text(hjust = 0.5))
-
 Inj<-injuries.event.sorted[1:nr,]
 Inj$Event <- factor(Inj$Event, levels = Inj$Event[order(-Inj$Injuries)])
 
@@ -438,18 +401,6 @@ ggplot(Inj, aes(x=Event, y=Injuries, fill=Event))+
   xlab("Event")+
   ylab("Injuries")+
   ggtitle("Injuries vs Event")+
-  theme_bw()+
-  theme(axis.text.x = element_text(angle = 90, hjust = 1))+
-  theme(plot.title = element_text(hjust = 0.5))
-
-AvgInj<-avginjuries.event.sorted[1:nr,]
-AvgInj$Event <- factor(AvgInj$Event, levels = AvgInj$Event[order(-AvgInj$AvgInjuries)])
-
-ggplot(AvgInj, aes(x=Event, y=AvgInjuries, fill=Event))+
-  geom_bar(stat="identity", position="dodge")+
-  xlab("Event")+
-  ylab("Avg. Injuries")+
-  ggtitle("Avg. Injuries vs Event")+
   theme_bw()+
   theme(axis.text.x = element_text(angle = 90, hjust = 1))+
   theme(plot.title = element_text(hjust = 0.5))
@@ -493,9 +444,6 @@ head(morbimortality.year.sorted)
 # barplot of Fatalities and Injuries by event type
 nr = 15 # just show 15 top values
 par(mfrow = c(3, 1), mar = c(11.5, 5, 4, 2), las = 3, cex = 0.5, cex.main = 1.4, cex.lab = 1.2)
-#with(fatalities.year.sorted[1:nr,], barplot(Fatalities, names.arg = fatalities.year.sorted$Year[1:nr], col = "red", ylab = "Fatalities", main = "Fatalities - Year"))
-#with(injuries.year.sorted[1:nr,], barplot(Injuries, names.arg = injuries.year.sorted$Year[1:nr], col = "green", ylab = "Injuries", main = "Injuries - Year"))
-#with(morbimortality.year.sorted[1:nr,], barplot(Total, names.arg = morbimortality.year.sorted$Year[1:nr], col = "blue", ylab = "Injuries", main = "Total (Fatalities + Injuries) - Year"))
 
 Faty<-fatalities.year.sorted[1:nr,]
 Faty$Year <- factor(Faty$Year, levels = Faty$Year[order(-Faty$Fatalities)])
@@ -560,9 +508,6 @@ head(morbimortality.state.sorted)
 # barplot of Fatalities and Injuries by event type
 nr = 15 # just show 15 top values
 par(mfrow = c(3, 1), mar = c(11.5, 5, 4, 2), las = 3, cex = 0.5, cex.main = 1.4, cex.lab = 1.2)
-#with(fatalities.state.sorted[1:nr,], barplot(Fatalities, names.arg = fatalities.state.sorted$State[1:nr], col = "red", ylab = "Fatalities", main = "Fatalities - State"))
-#with(injuries.state.sorted[1:nr,], barplot(Injuries, names.arg = injuries.state.sorted$State[1:nr], col = "green", ylab = "Injuries", main = "Injuries - State"))
-#with(morbimortality.state.sorted[1:nr,], barplot(Total, names.arg = morbimortality.state.sorted$State[1:nr], col = "blue", ylab = "Morbimortality", main = "Total (Fatalities + Injuries) - State"))
 
 Fats<-fatalities.state.sorted[1:nr,]
 Fats$State <- factor(Fats$State, levels = Fats$State[order(-Fats$Fatalities)])
@@ -602,10 +547,6 @@ ggplot(Mors, aes(x=State, y=Total, fill=State))+
 
 ############ Random Forest ###################
 
-# set random seed
-set.seed(123)
-
-
 #** (4) question: which variables(colums) are more influencial in the estimation of total damage (crop + property damage)? ------
 #   Answer: As it is shown in important variables plot, the most influencial variables are:
 #   FATALITIES, LATITUDE, Population, Magnitude of hail, min tempreture, longitude, average tempratue, max tempreture, fujita scale (tornado power), economical condition for each state(rgdp), raining rate (pcp), width of turnado, ...
@@ -619,32 +560,23 @@ set.seed(123)
 # distinguish what are the real variables influencing the prediction of total damage
 # we also remove factors to run random forest
 
-str(storm)
 storm_sample = storm[sample(nrow(storm),0.01*nrow(storm)),] # small sample data to do randonforest 
 
 storm1 = as.data.frame(storm[,-c(1, 3, 8, 9, 17)]) # We removed EVTYPE, PROPDMG_t, CROPDMG_t
-str(storm1)
 storm1_s = storm_sample[,-c(1, 3, 8, 9, 17)] 
-str(storm1_s)
 
 rf = randomForest(DMG_t~., data=storm1_s, importance =T,  na.action=na.omit)  
-print(rf)  
 par(mfrow = c(1, 1), mar = c(11.5, 5, 4, 2), las = 3, cex = 0.5, cex.main = 1.4, cex.lab = 1.2)
 plot(rf, main="Random Forest Regression for ecomate (economic + climate + natural events) for estimating total damage (crop + property damage)")
-str(rf$test)
-#?randomForest
+
 length(rf$mse)
 
-#nrow(rf$mse)
-#rep(1:nrow(rf$mse),1)
 x<-rep(1:length(rf$mse))
 y<-rf$mse
 rfd<-data.frame(x,y)
 
 ggplot(rfd, aes(x, y))+
-  #geom_point(col='blue')+
   geom_line(col='blue')+
-  #stat_smooth(method='lm', col='red')+
   theme_bw()+
   xlab('Number of trees')+
   ylab('Error (MSE)')+
@@ -667,12 +599,10 @@ varImpPlot(rf2, scale=T, main = "Variable Importance Plot for Estimating Total D
 #   which makes sense, like our previous interpretation of result again LONGITUDE is influencial (place of living is important), 
 #   population is important (more population leads to more morbi and Fujita(Thurnado power) are among most influencial features)
 #   but in this case, morbi is not influenced by economical condition (rgdp), even if you are rich, if the natural even is strong, you will die!! :D
-str(storm)
+
 storm2 <- storm[,-c(1,3, 4, 5, 10)]
-str(storm2)
 storm2_s <-  storm_sample[,-c(1,3, 4, 5, 10)]
-str(storm2_s)
-str(storm2)
+
 # we removed DMG_t because it was the sum of crop damage (CROPDMG_t) and property damage (PROPDMG_t) to avoid repetitious features
 # We removed FATALITIES and INJURIES because MORBI_T is sum of them to extract real influencial factors 
 # we also remove factors to run random forest
@@ -680,16 +610,13 @@ str(storm2)
 rf = randomForest(MORBI_t~., data=storm2_s, importance =T,  na.action=na.omit)  # remove factors to run random forest
 print(rf)  
 par(mfrow = c(1, 1), mar = c(11.5, 5, 4, 2), las = 3, cex = 0.5, cex.main = 1.4, cex.lab = 1.2)
-#plot(rf, main="Random Forest Regression for ecomate (economic + climate + natural events) for estimating Morbi (fatalities + injueirs)")
 
 x<-rep(1:length(rf$mse))
 y<-rf$mse
 rfd<-data.frame(x,y)
 
 ggplot(rfd, aes(x, y))+
-  #geom_point(col='blue')+
   geom_line(col='blue')+
-  #stat_smooth(method='lm', col='red')+
   theme_bw()+
   xlab('Number of trees')+
   ylab('Error (MSE)')+
@@ -718,42 +645,34 @@ varImpPlot(rf2, scale=T, main = "Variable Importance Plot for Estimating Morbimo
 # we removed crop damage (CROPDMG_t) and property damage (PROPDMG_t) because DMG_t is the sum of these two variables, and it is better to be removed to 
 # distinguish what are the real variables influencing the prediction of total damage
 # we also remove factors to run random forest
-str(storm_sample)
-storm3 = storm[,c(-1,-10,-17)]
+str(storm)
+#storm3 = storm[,c(-1,-10,-17)]
+storm3 = storm[,c(-1, -4,-5,-8,-9,-11,-14,-15)]
 str(storm3)
-storm3_s = storm_sample[,c(-1, -10, -17)]
-str(storm3)
-
+storm3_s = storm_sample[,c(-1, -4,-5,-8,-9,-11,-14,-15)]
+str(storm3_s)
 table(factor(storm3$EVTYPE))
 levels(storm3$EVTYPE)
 storm3$EVTYPE <- factor(storm3$EVTYPE);
 table(factor(storm3$EVTYPE))
-str(storm3)
 
-#View(storm3)
 table(factor(storm3_s$EVTYPE))
 levels(storm3_s$EVTYPE)
 storm3_s$EVTYPE <- factor(storm3_s$EVTYPE);
 table(factor(storm3$EVTYPE))
 str(storm3_s)
-
+library(randomForest)
 crf = randomForest(EVTYPE~., data=storm3_s, importance = T, method = " class", proximity = T )
 print(crf)
 predict(crf, type='prob')
-
 plot(crf)
-
 err<-crf$err.rate
-names(err[1,])
-library(reshape2)
+
+library(googleVis)
 library(ggplot2)
 
-str(err[1,])
 test <- data.frame(hmm=err, trees=as.numeric(rep(1:500)))
-head(test)
 
-str(test)
-library(RColorBrewer)
 labels <- as.factor(names(err[1,]))
 cols = colorRampPalette(brewer.pal(11, "Spectral"))(15)
 wtf <- as.factor(err)
@@ -780,35 +699,22 @@ ggplot(data=test,aes(x=trees)) +
   theme(plot.title = element_text(hjust = 0.5))+
   theme_bw() 
 
-
-library(RColorBrewer)
-# par(mfrow = c(1, 1), las = 3, cex = 0.5, cex.main = 1.4, cex.lab = 1.2, xpd = T, mar = par()$mar + c(0,0,0,7))
-# plot(crf, col=colorRampPalette(brewer.pal(11, "Spectral"))(14), lty = c(1,1,1,1,1,1,1,1,1,1,1,1,1,1),
-#      main="Random Forest Classification for event type estimating ")
-# legend("topright", inset= c(-0.2,0),colnames(crf$err.rate), col=1:15,  lty = c(1,1,1,1,1,1,1,1,1,1,1,1,1,1)  , bty='n', y.intersp= 0.5)
-
+str(storm3_s)
 x = round(importance(crf),3)
-y = x[,1:14]
-str(y)
+str(x)
+y = x[,1:8]
 
-par(mfrow = c(1, 1), las = 3, cex = 0.8, cex.main = 1.4, cex.lab = 1.2, xpd = F, mar = c(10,7,3,9), mgp = c(5, 1, 0))
+par(mfrow = c(1, 1), las = 3, cex = 0.8, cex.main = 1.4, cex.lab = 1.2, xpd = F, mar = c(11,7,5,9), mgp = c(5, 1, 0))
 
 barplot( y, legend.text = rownames(x), col=colorRampPalette(brewer.pal(11, "Spectral"))(14),
          main="Variable Importance Plot for Estimating Event Type",
          xlab="Event",
          ylab="Importance",
-         args.legend=list(x=ncol(y) + 7, y= max(colSums(y))) )
+         args.legend=list(x=ncol(y) + 4, y= max(colSums(y))) )
 abline(h=0, col="black")
 
 
-# ct = ctree(EVTYPE~., data=storm3)
-# ct
-# plot(ct, type='simple')
-# print(rf)  
-# par(mfrow = c(1, 1), mar = c(11.5, 5, 4, 2), las = 3, cex = 0.5, cex.main = 1.4, cex.lab = 1.2)
-
 ########## Recursive Partitioning (Decision trees) ######################
-str(storm1)
 
 rfit = rpart(DMG_t~., data=storm1, method="anova", control = rpart.control(minsplit=10))
 par(mfrow = c(1, 1), mar = c(11.5, 5, 4, 2), las = 1, cex = 1, cex.main = 1.4, cex.lab = 1.2)
@@ -816,15 +722,14 @@ plot(rfit, uniform=T,
      main="Recursive Partitioning Tree on Total Damage", margin=0.2)
 text(rfit,   use.n=TRUE, all= T, cex=0.8)
 
-str(storm2)
 rfit = rpart(MORBI_t~., data=storm2, method="anova", control = rpart.control(minsplit=10))
 par(mfrow = c(1, 1), mar = c(0.1, 0.1, 3, 0.1), las = 1, cex = 1, cex.main = 1.4, cex.lab = 1.2)
 plot(rfit, uniform=T, main="Recursive Partitioning Tree on Morbimortality", margin=0.2)
 text(rfit,   use.n=TRUE, all= T, cex=0.8)
 
-str(storm3)
-#storm3 <- storm[,-c(4,5, 8, 9, 14, 15)]
-storm3$EVTYPE[6]
+library(rpart)
+library(party)
+library(partykit)
 cfit = rpart(EVTYPE~., data=storm3, method = "class")
 par(mfrow = c(3, 1), mar = c(11.5, 5, 4, 2), las = 1, cex = 0.9, cex.main = 1.4, cex.lab = 1.2)
 plot(as.party(cfit), 
@@ -832,33 +737,20 @@ plot(as.party(cfit),
      tp_args = list(id=FALSE))
 
 ######### Bayesian Analysis ########################
-install.packages("bnlearn")
-library(data.table)
-library(lattice)
-#library(bnlearn)
-library(igraph)
+install.packages("bnlearn") #Don't comment out this line!!!!!! You must execute this line to get bayes net working.
 library(bnlearn)
-library(network)
-library(deal)
-library(RColorBrewer)
-library(PerformanceAnalytics)
+
 #** DMG_t --------
 str(storm1)
 #learning a bayesian network from continues data
 bnhc <- hc(storm1, score="bic-g")# based on gausian 
-bnhc
-bnhc$nodes
-bnhc$arcs
-str(colnames(storm1))
 edges=arcs(bnhc)
 nodes=nodes(bnhc)
 
-#cols = colorRampPalette(brewer.pal(11, "Spectral"))(length(colnames(storm1)))
 net <- graph.data.frame(edges,directed=T,vertices=nodes)
 par(mfrow = c(1, 1), mar = c(4, 0.1, 4, 0.1), las = 3, cex = 0.8, cex.main = 1.4, cex.lab = 1.2)
 plot(net,vertex.label=V(net)$name,vertex.size=(3*nchar(V(net)$name)),
      main="Bayesian Network Plot on Total Damage",
-     #xlab=colnames(storm1),
      edge.arrow.size=0.3,vertex.color=colorRampPalette(brewer.pal(11, "Spectral"))(length(colnames(storm1))),
      edge.color="black")
 text(0, -1.5, toString(colnames(storm1), Width = " "), cex = .8, font=2)
@@ -870,29 +762,21 @@ str(storm2)
 storm2 <- na.omit(storm2)
 #learning a beysian network from continues data
 bnhc <- hc(storm2, score="bic-g")# based on gausian 
-bnhc
-bnhc$nodes
-bnhc$arcs
 
 edges=arcs(bnhc)
 nodes=nodes(bnhc)
 net <- graph.data.frame(edges,directed=T,vertices=nodes)
 plot(net,vertex.label=V(net)$name,vertex.size=(3*nchar(V(net)$name)),
      main="Bayesian Network Plot on Morbimortalities",
-     #xlab=colnames(storm1),
      edge.arrow.size=0.3,vertex.color=colorRampPalette(brewer.pal(11, "Spectral"))(length(colnames(storm2))),
      edge.color="black")
 text(0, -1.5, toString(colnames(storm2), Width = " "), cex = .8, font=2)
 
-
 chart.Correlation(storm2,pch=21,histogram=TRUE)
 
 #** EVTYPE
-library(deal)
-str(storm3)
-storm4 = storm3_s [,c(2,3,4,5,6,8,9,10,11,12,13,14)] # we removed year and crop_dmg because these columns caused Beysian analysis to become ill-conditioned because of two many repetitious values and zeros
-str(storm4)
 
+storm4 = storm3_s [,c(2,3,4,5,6,8,9,10,11,12,13,14)] # we removed year and crop_dmg because these columns caused Beysian analysis to become ill-conditioned because of two many repetitious values and zeros
 storm3.nw <- network(storm4)          
 storm3.prior <- jointprior(storm3.nw) # make joint prior distribution
 # learn estimate parameters
@@ -906,7 +790,6 @@ plot(getnetwork(result),
 text(170, -50, toString(colnames(storm4), Width = " "), cex = .8, font=2)
 
 ################# Map ################
-library(googleVis)
 #** Map plots to support question 3
 #** (3) Across the United States, in which state people experienced the most number of Fatalities and Injuries?--------
 statecodeweb=url(paste("http://eunyoungko.com/resources/rprojectdata/economic/","statecode.csv", sep=""))
@@ -914,11 +797,8 @@ statecode <- read.csv(statecodeweb,sep=",", header=TRUE)
 colnames(statecode)<-c("STATENAME","STATE")
 statecode
 storm_v=merge(storm,statecode, by="STATE", all.x=TRUE)
-head(storm_v)
-str(storm_v)
 storm_m = storm_v[,c(4,5,17, 8,9,10 )]
 storm_m.state = aggregate(storm_m, by = list(storm_v$STATENAME), FUN = sum)
-head(storm_m.state) 
 colnames(storm_m.state)[1] <- c("STATENAME")
 #** Morbi Map Plots ---------------
 #** FATALITY MAP Plot for each state
@@ -931,7 +811,6 @@ MapFATALITIES <- gvisGeoChart(storm_m.state, "STATENAME", "FATALITIES",
 g=plot(MapFATALITIES)
 print(MapFATALITIES,file="required_map_plots/MapFATALITIES.html")
 
-
 #** INJURIES MAP Plot for each state
 head(storm_m.state[order(-storm_m.state$INJURIES, na.last=TRUE),])
 MapINJURIES <- gvisGeoChart(storm_m.state, "STATENAME", "INJURIES",
@@ -941,7 +820,6 @@ MapINJURIES <- gvisGeoChart(storm_m.state, "STATENAME", "INJURIES",
                                          width=600, height=400))
 g=plot(MapINJURIES)
 print(MapINJURIES,file="required_map_plots/MapINJURIES.html")
-
 
 #** MORBI_t MAP Plot for each state
 head(storm_m.state[order(-storm_m.state$MORBI_t, na.last=TRUE),])
@@ -953,8 +831,6 @@ MapMORBI_t <- gvisGeoChart(storm_m.state, "STATENAME", "MORBI_t",
 g=plot(MapMORBI_t)
 print(MapMORBI_t,file="required_map_plots/MapMORBI_t.html")
 
-
-
 #** property damage Map plots ----------------
 #** PROPDMG_t MAP Plot for each state
 head(storm_m.state[order(-storm_m.state$PROPDMG_t, na.last=TRUE),])
@@ -962,11 +838,10 @@ MapPROPDMG_t <- gvisGeoChart(storm_m.state, "STATENAME", "PROPDMG_t",
                              options=list(region="US", 
                                           displayMode="regions", 
                                           resolution="provinces",
-                                          colors="red"
+                                          colors="red",
                                           width=600, height=400))
 g=plot(MapPROPDMG_t)
 print(MapPROPDMG_t,file="required_map_plots/MapPROPDMG_t.html")
-
 
 #** CROPDMG_t MAP Plot for each state
 head(storm_m.state[order(-storm_m.state$CROPDMG_t, na.last=TRUE),])
@@ -979,7 +854,6 @@ MapCROPDMG_t <- gvisGeoChart(storm_m.state, "STATENAME", "CROPDMG_t",
 g=plot(MapCROPDMG_t)
 print(MapCROPDMG_t,file="required_map_plots/MapCROPDMG_t.html")
 
-
 #** DMG_t MAP Plot for each state
 head(storm_m.state[order(-storm_m.state$DMG_t, na.last=TRUE),])
 MapDMG_t <- gvisGeoChart(storm_m.state, "STATENAME", "DMG_t",
@@ -991,5 +865,354 @@ MapDMG_t <- gvisGeoChart(storm_m.state, "STATENAME", "DMG_t",
 g=plot(MapDMG_t)
 print(MapDMG_t,file="required_map_plots/MapDMG_t.html")
 
+#**Additional codes (Eunyoung)----------------
 
+## Regarding RQ1, it may worth to plot average fatalities, injuries, morbimortality per event for each event type. 
+# Average fatalities by event type
+avgfatalities.event <- aggregate(storm$FATALITIES, by = list(storm$EVTYPE), FUN = mean)
+colnames(avgfatalities.event) <- c("Event", "AvgFatalities")
+avgfatalities.event.sorted <- avgfatalities.event[order(-avgfatalities.event$AvgFatalities, na.last=TRUE), ]
+head(avgfatalities.event.sorted)
+
+# Average Injuries by event type
+avginjuries.event <- aggregate(storm$INJURIES, by = list(storm$EVTYPE), FUN = mean)
+colnames(avginjuries.event) <- c("Event", "AvgInjuries")
+avginjuries.event.sorted <- avginjuries.event[order(-avginjuries.event$AvgInjuries, na.last=TRUE), ]
+head(avginjuries.event.sorted)
+
+# Combine Injuries and Fatalities per each event 
+morbimortality=storm$FATALITIES+storm$INJURIES
+storm_temp=storm
+storm_temp$morbimortal=morbimortality
+avgmorbimortality.event <- aggregate(storm_temp$morbimortal, by = list(storm$EVTYPE), FUN = mean)
+colnames(avgmorbimortality.event) <- c("Event", "AvgMorbimortal")
+avgmorbimortality.event.sorted <- avgmorbimortality.event[order(-avgmorbimortality.event$AvgMorbimortal, na.last=TRUE), ]
+head(avgmorbimortality.event.sorted)
+
+nr = 15 # just show 15 top values
+par(mfrow = c(3, 1), mar = c(11.5, 5, 4, 2), las = 3, cex = 0.5, cex.main = 1.4, cex.lab = 1.2)
+
+AvgFat<-avgfatalities.event.sorted[1:nr,]
+AvgFat$Event <- factor(AvgFat$Event, levels = AvgFat$Event[order(-AvgFat$AvgFatalities)])
+ggplot(AvgFat, aes(x=Event, y=AvgFatalities, fill=Event))+
+  geom_bar(stat="identity", position="dodge")+
+  xlab("Event")+
+  ylab("Avg. Fatalities")+
+  ggtitle("Avg. Fatalities vs Event")+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))+
+  theme(plot.title = element_text(hjust = 0.5))
+
+AvgInj<-avginjuries.event.sorted[1:nr,]
+AvgInj$Event <- factor(AvgInj$Event, levels = AvgInj$Event[order(-AvgInj$AvgInjuries)])
+ggplot(AvgInj, aes(x=Event, y=AvgInjuries, fill=Event))+
+  geom_bar(stat="identity", position="dodge")+
+  xlab("Event")+
+  ylab("Avg. Injuries")+
+  ggtitle("Avg. Injuries vs Event")+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))+
+  theme(plot.title = element_text(hjust = 0.5))
+
+AvgMor<-avgmorbimortality.event.sorted[1:nr,]
+AvgMor$Event <- factor(AvgMor$Event, levels = AvgMor$Event[order(-AvgMor$AvgMorbimortal)])
+ggplot(AvgMor, aes(x=Event, y=AvgMorbimortal, fill=Event))+
+  geom_bar(stat="identity", position="dodge")+
+  xlab("Event")+
+  ylab("Avg. Morbimortalities")+
+  ggtitle("Avg. Morbimortalities vs Event")+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))+
+  theme(plot.title = element_text(hjust = 0.5))
+
+## Regarding RQ2, it may worth to plot variables by year, year in increasing order. 
+Fatyinc<-fatalities.year
+ggplot(Fatyinc, aes(x=factor(Year), y=Fatalities, fill= Year))+
+  geom_bar(stat="identity")+
+  xlab("Year")+
+  ylab("Fatalities")+
+  ggtitle("Fatalities vs Year")+
+  theme_bw()+
+  theme(plot.title = element_text(hjust = 0.5))+
+  theme(legend.position="none")+
+  geom_text(aes(label=Fatalities), vjust=-0.5, color="black", size=2.5)
+
+Injyinc<-injuries.year
+ggplot(Injyinc, aes(x=factor(Year), y=Injuries, fill=Year))+
+  geom_bar(stat="identity")+
+  xlab("Year")+
+  ylab("Injuries")+
+  ggtitle("Injuries vs Year")+
+  theme_bw()+
+  theme(plot.title = element_text(hjust = 0.5))+
+  theme(legend.position="none")+
+  geom_text(aes(label=Injuries), vjust=-0.5, color="black", size=2.5)
+
+Moryinc<-morbimortality.year
+
+ggplot(Moryinc, aes(x=factor(Year), y=Total))+
+  geom_bar(stat="identity", fill="orange")+
+  xlab("Year")+
+  ylab("Morbimortality")+
+  ggtitle("Morbimortality vs Year")+
+  theme_bw()+
+  theme(plot.title = element_text(hjust = 0.5))+
+  theme(legend.position="none")+
+  geom_text(aes(label=Injuries), vjust=-0.5, color="black", size=2.5)
+
+
+## Regarding RQ4, disinguish dependent and independent variables and then run random forest prediction model.
+
+#** Random forest, removing confounding factors------------
+#Input and Output Feature Matrix 
+# indep: "STATE", "YEAR" "EVTYPE" "LATITUDE" "LONGITUDE" "rgdp" "pop" "tavg" "tmax" "tmin" "pcp"
+# dep: "FATALITIES" "INJURIES" "PROPDMG_t" "CROPDMG_t" "DMG_t" "MORBI_t"
+
+# indep to use - year, evtype, latitude, longitude, rgdp, pop, pcp
+set.seed(456)
+storm_sample = storm[sample(nrow(storm),0.01*nrow(storm)),] # small sample data to do randonforest 
+str(storm_sample)
+storm1 = as.data.frame(storm[,-c(1, 3, 8, 9, 17)]) # We removed EVTYPE, PROPDMG_t, CROPDMG_t
+storm1_s = storm_sample[,-c(1, 3, 8, 9, 17)] 
+
+storm2 <- storm[,-c(1,3, 4, 5, 10)]
+storm2_s <-  storm_sample[,-c(1,3, 4, 5, 10)]
+storm3 = storm[,c(-1,-10,-17)]
+storm3_s = storm_sample[,c(-1, -10, -17)]
+
+table(factor(storm3$EVTYPE))
+levels(storm3$EVTYPE)
+storm3$EVTYPE <- factor(storm3$EVTYPE);
+table(factor(storm3$EVTYPE))
+
+table(factor(storm3_s$EVTYPE))
+levels(storm3_s$EVTYPE)
+storm3_s$EVTYPE <- factor(storm3_s$EVTYPE);
+table(factor(storm3$EVTYPE))
+
+library(randomForest)
+storm_ext=storm
+storm_ext$rgdppc=storm$rgdp/storm$pop # extend dataset to include real gdp per capita. 
+#View(storm_rfDMG)
+str(storm_rfDMG)
+# Total damage #
+#storm_ext=subset(storm_ext,EVTYPE=="FLOOD")
+storm_rfDMG=storm_ext[,c("LATITUDE","LONGITUDE","rgdppc","tavg","pop","pcp","DMG_t", "EVTYPE")]
+storm_rfDMG$DMG_t=storm_rfDMG$DMG_t/100000
+storm_rfDMG_sample = storm_rfDMG[sample(nrow(storm_rfDMG),0.04*nrow(storm_rfDMG)),] # small sample data to do randonforest 
+#?sample
+rf = randomForest(DMG_t~., data=storm_rfDMG_sample, importance =T,  na.action=na.omit)  
+print(rf)  
+par(mfrow = c(1, 1), mar = c(11.5, 5, 4, 2), las = 3, cex = 0.5, cex.main = 1.4, cex.lab = 1.2)
+plot(rf, main="Random Forest Regression for Ecomate estimating total damage")
+#?randomForest
+#length(rf$mse)
+n <- which.min(rf$mse); n
+min(rf$mse)
+
+#nrow(rf$mse)
+#rep(1:nrow(rf$mse),1)
+x<-rep(1:length(rf$mse))
+y<-rf$mse
+rfd<-data.frame(x,y)
+library(ggplot2)
+ggplot(rfd, aes(x, y))+
+  #geom_point(col='blue')+
+  geom_line(col='blue')+
+  #stat_smooth(method='lm', col='red')+
+  theme_bw()+
+  xlab('Number of trees')+
+  ylab('Error (MSE)')+
+  ggtitle("Random Forest Regression of Ecomate for Estimating Total Damage")+
+  theme(plot.title = element_text(hjust = 0.5))
+
+#--- optimal number of trees
+n <- which.min(rf$mse); n   # give me the index which mse error of random forest is minimum
+min(rf$mse)
+rf2 <- randomForest(DMG_t~., data=storm_rfDMG_sample, 
+                    ntree=n, importance=TRUE, na.action=na.omit)  # now you can say the number of trees is the optimal one we found
+
+
+par(mfrow = c(1, 1), mar = c(11.5, 5, 4, 2), las = 1, cex = 0.5, cex.main = 1.4, cex.lab = 1.2)
+varImpPlot(rf2, scale=T, main = "Variable Importance Plot for Estimating Total Damage")
+
+
+## Total morbimortality
+storm_rfMORBI=storm_ext[,c("LATITUDE","LONGITUDE","rgdppc","tavg","pop","pcp","EVTYPE","MORBI_t")]
+storm_rfMORBI_sample = storm_rfMORBI[sample(nrow(storm_rfMORBI),0.04*nrow(storm_rfMORBI)),] # small sample data to do randonforest 
+
+rf = randomForest(MORBI_t~., data=storm_rfMORBI_sample, importance =T,  na.action=na.omit)  # remove factors to run random forest
+print(rf)  
+par(mfrow = c(1, 1), mar = c(11.5, 5, 4, 2), las = 3, cex = 0.5, cex.main = 1.4, cex.lab = 1.2)
+plot(rf)
+x<-rep(1:length(rf$mse))
+y<-rf$mse
+rfd<-data.frame(x,y)
+
+ggplot(rfd, aes(x, y))+
+  geom_line(col='blue')+
+  theme_bw()+
+  xlab('Number of trees')+
+  ylab('Error (MSE)')+
+  ggtitle("Random Forest Regression of Ecomate for Estimating Morbimortalities")+
+  theme(plot.title = element_text(hjust = 0.5))
+
+#--- optimal number of trees
+n <- which.min(rf$mse); n   # give me the index which mse error of random forest is minimum
+
+rf2 <- randomForest(MORBI_t~., data=storm_rfMORBI_sample, 
+                    ntree=n, importance=TRUE, na.action=na.omit)  # now you can say the number of trees is the optimal one we found
+
+#--- Importance of variables in estimating total damage (DMG_t): higher value mean more important
+#  this importance will give you which feature is important in deciding this tree
+par(mfrow = c(1, 1), mar = c(11.5, 5, 4, 2), las = 1, cex = 0.5, cex.main = 1.4, cex.lab = 1.2)
+varImpPlot(rf2, scale=T, main = "Variable Importance Plot for Estimating Morbimortalities")
+
+## Total morbimortality per population
+storm_rfMORBI=storm_ext[,c("LATITUDE","LONGITUDE","rgdppc","tavg","pop","pcp","EVTYPE","MORBI_t")]
+storm_rfMORBI$MORBI_t=storm_rfMORBI$MORBI_t/storm_rfMORBI$pop*1000
+storm_rfMORBI_sample = storm_rfMORBI[sample(nrow(storm_rfMORBI),0.04*nrow(storm_rfMORBI)),] # small sample data to do randonforest 
+
+rf = randomForest(MORBI_t~., data=storm_rfMORBI_sample, importance =T,  na.action=na.omit)  # remove factors to run random forest
+print(rf)  
+par(mfrow = c(1, 1), mar = c(11.5, 5, 4, 2), las = 3, cex = 0.5, cex.main = 1.4, cex.lab = 1.2)
+plot(rf)
+x<-rep(1:length(rf$mse))
+y<-rf$mse
+rfd<-data.frame(x,y)
+
+ggplot(rfd, aes(x, y))+
+  geom_line(col='blue')+
+  theme_bw()+
+  xlab('Number of trees')+
+  ylab('Error (MSE)')+
+  ggtitle("Random Forest Regression of Ecomate for Estimating Morbimortalities")+
+  theme(plot.title = element_text(hjust = 0.5))
+
+#--- optimal number of trees
+n <- which.min(rf$mse); n   # give me the index which mse error of random forest is minimum
+
+rf2 <- randomForest(MORBI_t~., data=storm_rfMORBI_sample, 
+                    ntree=40, importance=TRUE, na.action=na.omit)  # now you can say the number of trees is the optimal one we found
+
+#--- Importance of variables in estimating total damage (DMG_t): higher value mean more important
+#  this importance will give you which feature is important in deciding this tree
+par(mfrow = c(1, 1), mar = c(11.5, 5, 4, 2), las = 1, cex = 0.5, cex.main = 1.4, cex.lab = 1.2)
+varImpPlot(rf2, scale=T, main = "Variable Importance Plot for Estimating Morbimortalities")
+
+#############
+#str(storm_rfMORBI$)
+library(googleVis)
+avgMortality <- gvisGeoChart(storm_rfMORBI, "STATE", "MORBI_t",
+                             options=list(region="US", 
+                                          displayMode="regions", 
+                                          resolution="provinces",
+                                          width=600, height=400))
+plot(avgMortality)
+
+
+
+## Recursive partitioning
+library(rpart)
+str(storm_rfDMG)
+rfit = rpart(DMG_t~., data=storm_rfDMG[,-8], method="anova", control = rpart.control(minsplit=10))
+par(mfrow = c(1, 1), mar = c(11.5, 5, 4, 2), las = 1, cex = 1, cex.main = 1.4, cex.lab = 1.2)
+plot(rfit, uniform=T,
+     main="Recursive Partitioning Tree on Total Damage", margin=0.2)
+text(rfit,   use.n=TRUE, all= T, cex=0.8)
+
+str(storm_rfMORBI)
+storm_rfMORBI$MORBI_t=storm_rfMORBI$MORBI_t*storm_rfMORBI$pop/1000
+rfit = rpart(MORBI_t~., data=storm_rfMORBI[,-7], method="anova", control = rpart.control(minsplit=10))
+par(mfrow = c(1, 1), mar = c(0.1, 0.1, 3, 0.1), las = 1, cex = 1, cex.main = 1.4, cex.lab = 1.2)
+plot(rfit, uniform=T, main="Recursive Partitioning Tree on Morbimortality", margin=0.2)
+text(rfit,   use.n=TRUE, all= T, cex=0.8)
+
+
+
+install.packages("bnlearn") #Don't comment out this line!!!!!! You must execute this line to get bayes net working.
+library(bnlearn)
+library(data.table)
+library(RColorBrewer)
+set.seed(47)
+#storm_sample = storm[sample(nrow(storm),nrow(storm)),] # small sample data to do randonforest 
+storm_sample=storm
+storm1 = as.data.frame(storm[,-c(1, 3, 8, 9, 17)]) # We removed EVTYPE, PROPDMG_t, CROPDMG_t
+storm1_s = storm_sample[,-c(1, 3, 8, 9, 17)] 
+
+storm2 <- storm[,-c(1,3, 4, 5, 10)]
+storm2_s <-  storm_sample[,-c(1,3, 4, 5, 10)]
+storm3 = storm[,c(-1,-10,-17)]
+storm3_s = storm_sample[,c(-1, -10, -17)]
+
+table(factor(storm3$EVTYPE))
+levels(storm3$EVTYPE)
+storm3$EVTYPE <- factor(storm3$EVTYPE);
+table(factor(storm3$EVTYPE))
+
+table(factor(storm3_s$EVTYPE))
+levels(storm3_s$EVTYPE)
+storm3_s$EVTYPE <- factor(storm3_s$EVTYPE);
+table(factor(storm3$EVTYPE))
+
+
+storm_ext=storm
+storm_ext$rgdppc=storm$rgdp/storm$pop # extend dataset to include real gdp per capita. 
+
+# Total damage #
+storm_rfDMG=storm_ext[,c("LATITUDE","LONGITUDE","rgdppc","tavg","pop","pcp","EVTYPE","DMG_t")]
+storm_rfDMG_sample = storm_rfDMG # small sample data to do randonforest 
+storm_rfDMG$DMG_t=storm_rfDMG$DMG_t/100000
+
+#** DMG_t --------
+str(storm)
+str(storm_rfDMG)
+#learning a bayesian network from continues data
+bnhc <- hc(storm_rfDMG[,-7], score="bic-g")# based on gausian 
+edges=arcs(bnhc)
+nodes=nodes(bnhc)
+library(igraph)
+net <- graph.data.frame(edges,directed=T,vertices=nodes)
+par(mfrow = c(1, 1), mar = c(4, 0.1, 4, 0.1), las = 3, cex = 0.8, cex.main = 1.4, cex.lab = 1.2)
+plot(net,vertex.label=V(net)$name,vertex.size=50,
+     main="Bayesian Network Plot on Total Damage",
+     edge.arrow.size=0.3,vertex.color=colorRampPalette(brewer.pal(11, "Spectral"))(length(colnames(storm1))),
+     edge.color="black")
+text(0, -1.5, toString(colnames(storm1), Width = " "), cex = .8, font=2)
+
+chart.Correlation(storm1,pch=21,histogram=TRUE)
+
+#** MORBI_t --------------
+str(storm2)
+storm2 <- na.omit(storm2)
+#learning a beysian network from continues data
+str(storm_rfMORBI)
+bnhc <- hc(storm_rfMORBI[,-7], score="bic-g")# based on gausian 
+
+edges=arcs(bnhc)
+nodes=nodes(bnhc)
+net <- graph.data.frame(edges,directed=T,vertices=nodes)
+plot(net,vertex.label=V(net)$name,vertex.size=50,
+     main="Bayesian Network Plot on Morbimortalities",
+     edge.arrow.size=0.3,vertex.color=colorRampPalette(brewer.pal(11, "Spectral"))(length(colnames(storm2))),
+     edge.color="black")
+text(0, -1.5, toString(colnames(storm2), Width = " "), cex = .8, font=2)
+
+chart.Correlation(storm2,pch=21,histogram=TRUE)
+
+#** EVTYPE
+library(network)
+str(storm3_s)
+#storm4 = storm3_s [,c(2,3,4,5,6,8,9,10,11,12,13,14)] # we removed year and crop_dmg because these columns caused Beysian analysis to become ill-conditioned because of two many repetitious values and zeros
+storm3.nw <- network(storm3_s)          
+storm3.prior <- jointprior(storm3.nw) # make joint prior distribution
+# learn estimate parameters
+storm3.nw <- learn(storm3.nw,storm4,storm3.prior)$nw
+
+result <- heuristic(initnw=storm3.nw, data=storm3, prior=storm3.prior,
+                    restart=2, degree=10, trace=FALSE)
+par(mfrow = c(1, 1), mar = c(11.5, 5, 4, 2), las = 3, cex = 0.8, cex.main = 1.4, cex.lab = 0.2)
+plot(getnetwork(result),
+     main="Bayesian Network Plot on Event Type")
+text(170, -50, toString(colnames(storm4), Width = " "), cex = .8, font=2)
 
