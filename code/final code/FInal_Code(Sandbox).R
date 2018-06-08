@@ -210,6 +210,8 @@ dim(final_storm)
 x<-na.exclude(final_storm)
 dim(x)
 save(x, file = "Cleandata.rda")
+
+storm=readRDS('Cleandata_ecomate.rda')
 x <- storm
 ###############################################################################################
 #################################################
