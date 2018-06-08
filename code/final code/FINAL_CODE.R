@@ -337,12 +337,15 @@ str(storm_n)
 
 ffit <- lm(formula = FATALITY_RATE ~ rgdppc + pop + DMG_t, data = storm_n)
 summary(ffit)
+chart.Correlation(storm_n[,c("FATALITY_RATE", "rgdppc", "pop", "DMG_t")],pch=21,histogram=TRUE)
 
 ifit <- lm(formula = INJURY_RATE ~ rgdppc + pop + DMG_t, data = storm_n)
 summary(ifit)
+chart.Correlation(storm_n[,c("INJURY_RATE", "rgdppc", "pop", "DMG_t")],pch=21,histogram=TRUE)
 
 dfit <- lm(formula = DMG_t ~ rgdppc + pop + INJURY_RATE + FATALITY_RATE, data = storm_n)
 summary(dfit)
+chart.Correlation(storm_n[,c("DMG_t", "rgdppc", "pop", "INJURY_RATE", "FATALITY_RATE")],pch=21,histogram=TRUE)
 
 
 
