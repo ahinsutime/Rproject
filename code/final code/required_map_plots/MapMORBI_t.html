@@ -1,0 +1,311 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>GeoChartIDa505b204514</title>
+<meta http-equiv="content-type" content="text/html;charset=utf-8" />
+<style type="text/css">
+body {
+  color: #444444;
+  font-family: Arial,Helvetica,sans-serif;
+  font-size: 75%;
+  }
+  a {
+  color: #4D87C7;
+  text-decoration: none;
+}
+</style>
+</head>
+<body>
+ <!-- GeoChart generated in R 3.4.3 by googleVis 0.6.2 package -->
+<!-- Sat Jun 02 23:40:22 2018 -->
+
+
+<!-- jsHeader -->
+<script type="text/javascript">
+ 
+// jsData 
+function gvisDataGeoChartIDa505b204514 () {
+var data = new google.visualization.DataTable();
+var datajson =
+[
+ [
+"ALABAMA",
+4147
+],
+[
+"ALASKA",
+14
+],
+[
+"ARIZONA",
+267
+],
+[
+"ARKANSAS",
+687
+],
+[
+"CALIFORNIA",
+869
+],
+[
+"COLORADO",
+228
+],
+[
+"CONNECTICUT",
+121
+],
+[
+"DELAWARE",
+98
+],
+[
+"FLORIDA",
+1600
+],
+[
+"GEORGIA",
+1216
+],
+[
+"IDAHO",
+99
+],
+[
+"ILLINOIS",
+585
+],
+[
+"INDIANA",
+241
+],
+[
+"IOWA",
+617
+],
+[
+"KANSAS",
+351
+],
+[
+"KENTUCKY",
+279
+],
+[
+"LOUISIANA",
+250
+],
+[
+"MAINE",
+39
+],
+[
+"MARYLAND",
+278
+],
+[
+"MASSACHUSETTS",
+492
+],
+[
+"MICHIGAN",
+229
+],
+[
+"MINNESOTA",
+275
+],
+[
+"MISSISSIPPI",
+720
+],
+[
+"MISSOURI",
+3084
+],
+[
+"MONTANA",
+45
+],
+[
+"NEBRASKA",
+146
+],
+[
+"NEVADA",
+103
+],
+[
+"NEW HAMPSHIRE",
+25
+],
+[
+"NEW JERSEY",
+177
+],
+[
+"NEW MEXICO",
+97
+],
+[
+"NEW YORK",
+195
+],
+[
+"NORTH CAROLINA",
+791
+],
+[
+"NORTH DAKOTA",
+59
+],
+[
+"OHIO",
+1768
+],
+[
+"OKLAHOMA",
+1188
+],
+[
+"OREGON",
+52
+],
+[
+"PENNSYLVANIA",
+203
+],
+[
+"RHODE ISLAND",
+16
+],
+[
+"SOUTH CAROLINA",
+213
+],
+[
+"SOUTH DAKOTA",
+205
+],
+[
+"TENNESSEE",
+1379
+],
+[
+"TEXAS",
+8250
+],
+[
+"UTAH",
+310
+],
+[
+"VERMONT",
+7
+],
+[
+"VIRGINIA",
+604
+],
+[
+"WASHINGTON",
+123
+],
+[
+"WEST VIRGINIA",
+42
+],
+[
+"WISCONSIN",
+303
+],
+[
+"WYOMING",
+99
+] 
+];
+data.addColumn('string','STATENAME');
+data.addColumn('number','MORBI_t');
+data.addRows(datajson);
+return(data);
+}
+ 
+// jsDrawChart
+function drawChartGeoChartIDa505b204514() {
+var data = gvisDataGeoChartIDa505b204514();
+var options = {};
+options["width"] = 600;
+options["height"] = 400;
+options["region"] = "US";
+options["displayMode"] = "regions";
+options["resolution"] = "provinces";
+
+
+    var chart = new google.visualization.GeoChart(
+    document.getElementById('GeoChartIDa505b204514')
+    );
+    chart.draw(data,options);
+    
+
+}
+  
+ 
+// jsDisplayChart
+(function() {
+var pkgs = window.__gvisPackages = window.__gvisPackages || [];
+var callbacks = window.__gvisCallbacks = window.__gvisCallbacks || [];
+var chartid = "geochart";
+  
+// Manually see if chartid is in pkgs (not all browsers support Array.indexOf)
+var i, newPackage = true;
+for (i = 0; newPackage && i < pkgs.length; i++) {
+if (pkgs[i] === chartid)
+newPackage = false;
+}
+if (newPackage)
+  pkgs.push(chartid);
+  
+// Add the drawChart function to the global list of callbacks
+callbacks.push(drawChartGeoChartIDa505b204514);
+})();
+function displayChartGeoChartIDa505b204514() {
+  var pkgs = window.__gvisPackages = window.__gvisPackages || [];
+  var callbacks = window.__gvisCallbacks = window.__gvisCallbacks || [];
+  window.clearTimeout(window.__gvisLoad);
+  // The timeout is set to 100 because otherwise the container div we are
+  // targeting might not be part of the document yet
+  window.__gvisLoad = setTimeout(function() {
+  var pkgCount = pkgs.length;
+  google.load("visualization", "1", { packages:pkgs, callback: function() {
+  if (pkgCount != pkgs.length) {
+  // Race condition where another setTimeout call snuck in after us; if
+  // that call added a package, we must not shift its callback
+  return;
+}
+while (callbacks.length > 0)
+callbacks.shift()();
+} });
+}, 100);
+}
+ 
+// jsFooter
+</script>
+ 
+<!-- jsChart -->  
+<script type="text/javascript" src="https://www.google.com/jsapi?callback=displayChartGeoChartIDa505b204514"></script>
+ 
+<!-- divChart -->
+  
+<div id="GeoChartIDa505b204514" 
+  style="width: 600; height: 400;">
+</div>
+ <div><span>Data: storm_m.state &#8226; Chart ID: <a href="Chart_GeoChartIDa505b204514.html">GeoChartIDa505b204514</a> &#8226; <a href="https://github.com/mages/googleVis">googleVis-0.6.2</a></span><br /> 
+<!-- htmlFooter -->
+<span> 
+  R version 3.4.3 (2017-11-30) 
+  &#8226; <a href="https://developers.google.com/terms/">Google Terms of Use</a> &#8226; <a href="https://google-developers.appspot.com/chart/interactive/docs/gallery/geochart">Documentation and Data Policy</a>
+</span></div>
+</body>
+</html>
