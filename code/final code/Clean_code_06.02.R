@@ -211,7 +211,8 @@ str(final_storm)
 dim(final_storm)
 x<-na.exclude(final_storm)
 dim(x)
-save(x, file = "Cleandata.rda")
+saveRDS(x, file = "Cleandata.rda")
+x <- readRDS("Cleandata.rda")
 ###############################################################################################
 #################################################
 #################################################

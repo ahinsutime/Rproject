@@ -209,8 +209,9 @@ str(final_storm)
 dim(final_storm)
 x<-na.exclude(final_storm)
 dim(x)
-save(x, file = "Cleandata.rda")
-x <- storm
+saveRDS(x, file = "Cleandata.rda")
+x <- readRDS("Cleandata_ecomate.rda")
+
 ###############################################################################################
 #################################################
 #################################################
@@ -304,20 +305,49 @@ multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
   }
 }
 multiplot(p1, p3, p2, cols=1)
-#**(4)Which ??????
+#**(4)
 bx_x=x
 bx_x$STATE <- as.character(x$STATE)
 bx_x<-subset(bx_x, subset = STATE %in% c("TX","KS","IA","AL","MO"))
 bx_x$STATE <- as.factor(bx_x$STATE)
 str(bx_x)
-str(bx_x)
-bx_x<-filter(x, STATE== "")
+
+#bx_x<-filter(x, STATE== "")
+
 ggplot(data = bx_x, 
        aes(x=STATE, y=FATALITIES)) + 
   geom_boxplot() + 
   facet_wrap(~YEAR,ncol = 8)
 #**(5)Linear regression----------
 chart.Correlation(x_n)
+
+
+
+######Linear Regression
+
+
+str(x)
+storm_n <- x[,-c(1, 3, 11, 14, 15)]
+str(storm_n)
+storm_n$FATALITY_RATE <- (storm_n$FATALITIES)/(storm_n$pop)
+storm_n$INJURY_RATE <- (storm_n$INJURIES)/(storm_n$pop)
+
+storm_n <- storm_n[,-c("FATALITIES", "INJURIES")]
+str(storm_n)
+
+ffit <- lm(formula = FATALITY_RATE ~ rgdppc + pop + DMG_t, data = storm_n)
+summary(ffit)
+
+ifit <- lm(formula = INJURY_RATE ~ rgdppc + pop + DMG_t, data = storm_n)
+summary(ifit)
+
+dfit <- lm(formula = DMG_t ~ rgdppc + pop + INJURY_RATE + FATALITY_RATE, data = storm_n)
+summary(dfit)
+
+
+
+
+
 
 ##############################start the code from here #######################
 # we = Amirsaman and Insu
@@ -615,24 +645,6 @@ plot(rfit, uniform=T, main="Recursive Partitioning Tree on Morbimortality", marg
 text(rfit,   use.n=TRUE, all= T, cex=0.8)
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #** (6) question: which variables(colums, features) are more influencial in the estimation of event type? ------
 #   Answer: As it is shown in important variables plot, the most influencial variables are:
 #   tmax, LONGITUDE, F, pcp, pop, ...
@@ -751,7 +763,6 @@ par(mfrow = c(1, 1), mar = c(11.5, 5, 4, 2), las = 3, cex = 0.8, cex.main = 1.4,
 plot(getnetwork(result),
      main="Bayesian Network Plot on Event Type")
 text(170, -10, toString(colnames(storm_E), Width = " "), cex = .8, font=2)
-
 
 
 ################# Map ################
